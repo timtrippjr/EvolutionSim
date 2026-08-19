@@ -1,18 +1,25 @@
-﻿Console.WriteLine("Hello, World!");
+﻿using static Raylib_cs.Raylib;
+using Color = Raylib_cs.Color;
 
-string? theStupidestPerson = Console.ReadLine(); 
+namespace EvolutionSim;
 
-bool reachedFailLine = false;
-if (theStupidestPerson is null)
-reachedFailLine = true;
-if (theStupidestPerson == string.Empty)
-reachedFailLine = true;
+internal static class Program
+{
+    [STAThread]
+    public static void Main()
+    {
+        InitWindow(800, 480, "WOW!! IM ECSTATIC!!");
 
+        while (!WindowShouldClose())
+        {
+            BeginDrawing();
+            ClearBackground(Color.White);
 
-if (reachedFailLine)
-Console.WriteLine("im feeling facty today.");
-else
-Console.WriteLine("wow! i HATE "+theStupidestPerson);
+            DrawText("Hello, world!", 12, 12, 20, Color.Black);
 
+            EndDrawing();
+        }
 
-Console.ReadKey(); 
+        CloseWindow();
+    }
+}
