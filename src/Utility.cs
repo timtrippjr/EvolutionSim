@@ -15,4 +15,14 @@ public static class Utility
             color
         );
     }
+
+    public static Color GetRandomColor()
+    {
+        Random rand = new Random();
+        return new Color(
+            rand.Next(255),
+            rand.Next(255),
+            rand.Next(255)
+        );
+    }
 }
