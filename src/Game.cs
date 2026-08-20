@@ -13,7 +13,7 @@ public class Game
             WindowHeight * WindowScale, 
             WindowTitle
         );
-        //SetTargetFPS(30);
+        SetTargetFPS(60);
         SetWindowIcon(GetImage(IconName));
         SetExitKey(KeyboardKey.Null);
         SetState(initState);
@@ -38,7 +38,7 @@ public class Game
     {
         BeginTextureMode(_buffer);
             _state?.Draw();
-            DrawFont($"fps: {GetFPS()}", Color.Beige, 1, 0, 0);
+            DrawFont($"fps: {GetFPS()}", Color.White, 1, 0, 0);
         EndTextureMode();
 
         BeginDrawing();
@@ -53,7 +53,7 @@ public class Game
                     WindowWidth * WindowScale, 
                     WindowHeight * WindowScale
                 ),
-                new Vector2(0, 0),
+                Vector2.Zero,
                 0,
                 Color.White
             );

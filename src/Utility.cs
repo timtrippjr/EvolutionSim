@@ -16,13 +16,13 @@ public static class Utility
         );
     }
 
-    public static Color GetRandomColor()
+    public static Color GetRandomColor(int minimum = 0)
     {
         Random rand = new Random();
         return new Color(
-            rand.Next(255),
-            rand.Next(255),
-            rand.Next(255)
+            rand.Next(minimum, 255),
+            rand.Next(minimum, 255),
+            rand.Next(minimum, 255)
         );
     }
 }

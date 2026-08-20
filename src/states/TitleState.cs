@@ -12,8 +12,8 @@ public class TitleState : State
     }
     public override void Draw()
     {
-        ClearBackground(Color.White);
-        DrawText("this works?!", 12, 12, 20, Color.Black);
-        DrawFont("Evolution Simulator!", Color.Black, 3, 12, 30);
+        ClearBackground(Color.Black);
+        DrawText("this works?!", 12, 12, 10, Color.DarkGray);
+        DrawFont("Evolution Simulator!", Color.Gray, 3, 12, 30);
     }
 }
