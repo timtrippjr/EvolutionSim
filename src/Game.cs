@@ -7,10 +7,10 @@ public class Game
 
     public void Init(State initState)
     {
-        InitWindow(800, 480, "WOW!! IM ECSTATIC!!");
-        SetExitKey(KeyboardKey.Null);
+        InitWindow(WindowWidth, WindowHeight, WindowTitle);
         SetTargetFPS(30);
-        SetWindowIcon(GetImage("icon.png"));
+        SetWindowIcon(GetImage(IconName));
+        SetExitKey(KeyboardKey.Null);
         SetState(initState);
     }
 
@@ -24,16 +24,14 @@ public class Game
         state?.Update();
 
         if (state?.done == true)
-        {
-            Console.WriteLine("I am here okay?");
             SetState(state.next);
-        }
     }
 
     public void Draw()
     {
         BeginDrawing();
             state?.Draw();
+            DrawFPS(0, 0);
         EndDrawing();
     }
 

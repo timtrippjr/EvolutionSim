@@ -7,6 +7,17 @@ public static class Resources
 {
     private static Dictionary<string, Image> _images = [];
     private static Dictionary<string, Texture2D> _textures = [];
+    private static Font _font = LoadFontEx(ResourcesFolder + "fonts/Pix32.ttf", 12, null, 0);
+
+    private static string GetImagePath(string path)
+    {
+        return ResourcesFolder + "images/" + path;
+    }
+
+    public static Font GetFont()
+    {
+        return _font;
+    }
 
     public static Image GetImage(string path)
     {
@@ -15,7 +26,7 @@ public static class Resources
         if (!_images.TryGetValue(path, out image))
         {
             Console.WriteLine($"Image \"{path}\" doesn't exist. Creating...");
-            image = LoadImage("res/" + path);
+            image = LoadImage(GetImagePath(path));
             _images[path] = image;
         }
 
@@ -37,7 +48,7 @@ public static class Resources
             else
             {
                 Console.WriteLine("Creating temp image...");
-                temp = LoadImage("res/" + path);
+                temp = LoadImage(GetImagePath(path));
                 texture = LoadTextureFromImage(temp);
                 UnloadImage(temp);
             }
