@@ -1,26 +1,16 @@
-using static Raylib_cs.Raylib;
-using Color = Raylib_cs.Color;
-
 namespace EvolutionSim;
 
 public class Game
 {
-    public void Init()
+    public State? state;
+    public bool done = false;
+
+    public void Init(State initState)
     {
         InitWindow(800, 480, "WOW!! IM ECSTATIC!!");
-    }
-
-    public void Loop()
-    {
-        while (!WindowShouldClose())
-        {
-            BeginDrawing();
-            ClearBackground(Color.White);
-
-            DrawText("i am inside game class!", 12, 12, 20, Color.Black);
-
-            EndDrawing();
-        }
+        SetExitKey(KeyboardKey.Null);
+        SetTargetFPS(30);
+        SetState(initState);
     }
 
     public void Close()
@@ -28,10 +18,40 @@ public class Game
         CloseWindow();
     }
 
-    public void Begin()
+    public void Update()
     {
-        Init();
-        Loop();
+        state?.Update();
+
+        if (state?.done == true)
+        {
+            Console.WriteLine("I am here okay?");
+            SetState(state.next);
+        }
+    }
+
+    public void Draw()
+    {
+        BeginDrawing();
+            state?.Draw();
+        EndDrawing();
+    }
+
+    public void SetState(State? next)
+    {
+        state?.Exit();
+        state = next; 
+        done = state is null;
+        state?.Enter();  
+    }
+
+    public void Begin(State initState)
+    {
+        Init(initState);
+        while (!WindowShouldClose() && !done)
+        {
+            Update();
+            Draw();
+        }
         Close();
     }
 

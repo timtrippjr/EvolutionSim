@@ -5,6 +5,6 @@ internal static class Program
     [STAThread]
     public static void Main()
     {
-        new Game().Begin();
+        new Game().Begin(new PlayState());
     }
 }
