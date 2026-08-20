@@ -7,7 +7,8 @@ public static class Resources
 {
     private static Dictionary<string, Image> _images = [];
     private static Dictionary<string, Texture2D> _textures = [];
-    private static Font _font = LoadFontEx(ResourcesFolder + "fonts/Pix32.ttf", 12, null, 0);
+    private static Font _font = 
+        LoadFontEx($"{ResourcesFolder}fonts/{FontName}", FontHeight, null, 0);
 
     private static string GetImagePath(string path)
     {

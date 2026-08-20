@@ -12,7 +12,7 @@ public class SimulationState : State
     public override void Draw()
     {
         ClearBackground(Color.DarkGray);
-        DrawText("i am inside playstate!", 12, 12, 20, Color.Red);
+        DrawFont("i am inside playstate!", Color.Red, 2, 40, 30);
         DrawTexture(_animal, 0, 0, Color.White);
     }
 }

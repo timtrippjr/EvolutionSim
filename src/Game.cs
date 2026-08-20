@@ -2,16 +2,23 @@ namespace EvolutionSim;
 
 public class Game
 {
-    public State? state;
-    public bool done = false;
+    private bool _done = false;
+    private State? _state;
+    private RenderTexture2D _buffer;
 
     public void Init(State initState)
     {
-        InitWindow(WindowWidth, WindowHeight, WindowTitle);
-        SetTargetFPS(30);
+        InitWindow(
+            WindowWidth * WindowScale, 
+            WindowHeight * WindowScale, 
+            WindowTitle
+        );
+        //SetTargetFPS(30);
         SetWindowIcon(GetImage(IconName));
         SetExitKey(KeyboardKey.Null);
         SetState(initState);
+
+        _buffer = LoadRenderTexture(WindowWidth, WindowHeight);
     }
 
     public void Close()
@@ -21,32 +28,50 @@ public class Game
 
     public void Update()
     {
-        state?.Update();
+        _state?.Update();
 
-        if (state?.done == true)
-            SetState(state.next);
+        if (_state?.done == true)
+            SetState(_state.next);
     }
 
     public void Draw()
     {
+        BeginTextureMode(_buffer);
+            _state?.Draw();
+            DrawFont($"fps: {GetFPS()}", Color.Beige, 1, 0, 0);
+        EndTextureMode();
+
         BeginDrawing();
-            state?.Draw();
-            DrawFPS(0, 0);
+            ClearBackground(Color.Black);
+            DrawTexturePro(
+                _buffer.Texture,
+                new Rectangle(0, 0, 
+                    _buffer.Texture.Width, 
+                    -_buffer.Texture.Height
+                ),
+                new Rectangle(0, 0, 
+                    WindowWidth * WindowScale, 
+                    WindowHeight * WindowScale
+                ),
+                new Vector2(0, 0),
+                0,
+                Color.White
+            );
         EndDrawing();
     }
 
     public void SetState(State? next)
     {
-        state?.Exit();
-        state = next; 
-        done = state is null;
-        state?.Enter();  
+        _state?.Exit();
+        _state = next; 
+        _done = _state is null;
+        _state?.Enter();  
     }
 
     public void Begin(State initState)
     {
         Init(initState);
-        while (!WindowShouldClose() && !done)
+        while (!WindowShouldClose() && !_done)
         {
             Update();
             Draw();
