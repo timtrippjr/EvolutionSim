@@ -1,0 +1,19 @@
+TODO
+
+create an "animal" class. there must be a way to define species?
+
+give them stats like food, hunger, thirst. when these are all satisfied, they aim to reproduce
+(fact check how accurate this is.)
+
+also give them things like: intelligents, sight, fitness
+(however, because there will be multiple strategies to survival, the program will not be just animals optimizing these stats.)
+
+there must be multiple strategies to survival. if possible, maybe different creatures will figure out different ways to thrive in their environment
+
+
+THE ENVIRONMENT 
+is a huge factor to survival. think of how this could affect animals
+
+
+
+this is great and all, but there's not much truly emergent gameplay
