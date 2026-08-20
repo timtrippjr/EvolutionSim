@@ -13,5 +13,6 @@ public class TestState : State
     {
         ClearBackground(Color.DarkGray);
         DrawText("this works?!", 12, 12, 20, Color.Red);
+        DrawTexture(GetTexture("banjo.png"), 0, 0, Color.White);
     }
 }

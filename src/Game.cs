@@ -10,6 +10,7 @@ public class Game
         InitWindow(800, 480, "WOW!! IM ECSTATIC!!");
         SetExitKey(KeyboardKey.Null);
         SetTargetFPS(30);
+        SetWindowIcon(GetImage("icon.png"));
         SetState(initState);
     }
 
