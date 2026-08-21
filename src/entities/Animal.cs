@@ -14,14 +14,17 @@ public class Animal : Entity
     {
         _color = GetRandomColor();
     }
+    public Animal(Vector2 pos) 
+        : this((int)pos.X, (int)pos.Y) 
+    {}
 
     public override void Draw()
     {
         Vector2 size = new Vector2(20, 30);
         DrawTexturePro(
-            _texture, 
+            Texture, 
             new Rectangle(Vector2.Zero, size), 
-            new Rectangle(_position, size), 
+            new Rectangle(Position, size), 
             size / 2, 0, _color
         );
     }
