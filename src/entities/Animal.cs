@@ -54,8 +54,10 @@ public class Animal : Entity
         ) 
     {}
 
-    public override void Update(List<Entity>? entities)
+    public override void Update(List<Entity>? entities, bool beingHovered)
     {
+        base.Update(entities, beingHovered);
+
         TimeSpan newTime = TimeSpan.FromSeconds(DeltaTime());
         _age += newTime;
 
@@ -110,10 +112,13 @@ public class Animal : Entity
             Math.Min(_baseFrameSize.X, _baseFrameSize.X * scalar),
             Math.Min(_baseFrameSize.Y, _baseFrameSize.Y * scalar)
         );
-        DrawTexturePro(Texture, 
-            new(Vector2.Zero, _baseFrameSize), 
-            new(Position, FrameSize), 
-            new(FrameSize.X / 2, FrameSize.Y), 0, _color
-        );
+        
+        if (_beingHovered) BeginShaderMode(_outlineShader);
+            DrawTexturePro(Texture, 
+                new(Vector2.Zero, _baseFrameSize), 
+                new(Position, FrameSize), 
+                Origin, 0, _color
+            );
+        if (_beingHovered) EndShaderMode();   
     }
 }

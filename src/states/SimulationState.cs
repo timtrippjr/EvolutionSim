@@ -3,15 +3,16 @@ namespace EvolutionSim;
 public class SimulationState : State
 {
     private List<Entity> _entities = [];
+    private Entity? _hover;
 
     public override void Enter()
     {
         
         for (int i = 0; i < 5; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 8; i++)
             _entities.Add(new Food(
-                (FoodType)i, 
+                (FoodType)(i % 2), 
                 GetRandomPosition()
             ));
 
@@ -33,7 +34,20 @@ public class SimulationState : State
             ));
 
         var snapshot = _entities.ToList();
-        snapshot.ForEach(e => e.Update(snapshot));
+        foreach (var e in snapshot)
+        {
+            
+            if (CheckCollisionPointRec(
+                GetMousePosition() / WindowScale, 
+                new(e.Position - e.Origin, e.FrameSize)
+            ))
+            {
+                _hover = e;
+                break;
+            }
+
+        };
+        snapshot.ForEach(e => e.Update(snapshot, _hover == e));
 
         var newEntities = _entities
             .Where(e => e.shouldDie)

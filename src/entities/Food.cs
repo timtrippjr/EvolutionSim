@@ -55,8 +55,10 @@ public class Food : Entity
         : this(type, (int)pos.X, (int)pos.Y)
     {}
 
-    public override void Update(List<Entity>? entities)
+    public override void Update(List<Entity>? entities, bool beingHovered)
     {
+        base.Update(entities, beingHovered);
+
         _age += TimeSpan.FromSeconds(DeltaTime());
         _crowdCount = GetNearbyEntities(entities);
 
@@ -95,6 +97,7 @@ public class Food : Entity
     }
     public override void Draw()
     {
+        if (_beingHovered) BeginShaderMode(_outlineShader);
         DrawTexturePro(
             Texture, 
             new(
@@ -107,6 +110,7 @@ public class Food : Entity
             new(Position, FrameSize), 
             new(FrameSize.X / 2, FrameSize.Y), 0, Color.White
         );
+        if (_beingHovered) EndShaderMode();   
 
         /*/tell us how many plants are neearby(degbugging)
         DrawFont(
