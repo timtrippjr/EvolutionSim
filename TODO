@@ -17,3 +17,13 @@ is a huge factor to survival. think of how this could affect animals
 
 
 this is great and all, but there's not much truly emergent gameplay
+
+
+
+
+
+
+////////////////////////////// real current TODO
+make the entities display their data when being hoevered over.
+make the animals realize hunger, then prioritize walking to food if it is in sight.
+make the animals realize satisfaction, then prioritize walking to a partner who is also satisfied to mate.
