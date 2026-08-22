@@ -15,6 +15,7 @@ public static class Constants
     public const string FontName = "Bomby.ttf";
     public const int FontHeight = 14;
     public const int FontSpacing = -2;
+    public const float TimeMultiple = 1;
 
     //////////////////
     public static readonly Random Rng = new();

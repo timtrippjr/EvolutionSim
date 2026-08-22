@@ -5,6 +5,7 @@ public class Entity
     public List<Entity> Children { get; set; } = new List<Entity>();
     public Vector2 Position { get; set; }
     public Texture2D Texture { get; set; }
+    public Vector2 FrameSize { get; set; }
     public bool shouldDie = false;
 
     public Entity(int x, int y, Texture2D tex)

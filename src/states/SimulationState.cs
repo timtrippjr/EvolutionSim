@@ -4,14 +4,6 @@ public class SimulationState : State
 {
     private List<Entity> _entities = [];
 
-    private Vector2 GetRandomPosition()
-    {
-        return new Vector2(
-            Rng.Next(WindowWidth),
-            Rng.Next(WindowHeight)
-        );
-    }
-
     public override void Enter()
     {
         
@@ -32,6 +24,8 @@ public class SimulationState : State
 
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
             _entities.Add(new Animal(GetRandomPosition()));
+        if (IsMouseButtonPressed(MouseButton.Right))
+            _entities.Add(new Animal(GetMousePosition() / WindowScale));
         if (IsMouseButtonPressed(MouseButton.Left))
             _entities.Add(new Food(
                 (FoodType)Rng.Next(2), 
@@ -52,10 +46,9 @@ public class SimulationState : State
     public override void Draw()
     {
         ClearBackground(Color.DarkGray);
-        DrawFont("i am inside playstate!", Color.Red, 2, 40, 30);
         
         _entities
-            .OrderBy(e => e.Position.Y + (e.Texture.Height / 2))
+            .OrderBy(e => e.Position.Y)
             .ToList()
             .ForEach(e => e.Draw());
         

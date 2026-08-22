@@ -25,4 +25,24 @@ public static class Utility
             rand.Next(minimum, 255)
         );
     }
+    
+    public static Vector2 GetRandomPosition()
+    {
+        return new Vector2(
+            Rng.Next(WindowWidth),
+            Rng.Next(WindowHeight)
+        );
+    }
+    
+    public static float GetSquaredDistBetween(Vector2 me, Vector2 other)
+    {
+        float dx = other.X - me.X;
+        float dy = other.Y - me.Y;
+        return (dx * dx) + (dy * dy);
+    }
+
+    public static float DeltaTime()
+    {
+        return GetFrameTime() * TimeMultiple;
+    }
 }

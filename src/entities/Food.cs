@@ -15,7 +15,6 @@ public enum FoodStage
 
 public class Food : Entity
 {
-    private static int _frameSize = 16;
     private TimeSpan _lifespan = TimeSpan.FromSeconds(Rng.Next(90, 110));
     private TimeSpan _age = TimeSpan.Zero;
 
@@ -32,19 +31,15 @@ public class Food : Entity
     private static float _crowdRadius = 40;
     private static int _reproductionRadius = 30;
     private int _crowdCount = 0;
-
-    private float GetSquaredDistBetween(Entity other)
-    {
-        float dx = other.Position.X - Position.X;
-        float dy = other.Position.Y - Position.Y;
-        return (dx * dx) + (dy * dy);
-    }
     private int GetNearbyEntities(List<Entity>? entities)
     {
         float radiusSquared = _crowdRadius * _crowdRadius;
         return entities?
-            .Where(entity => entity != this)
-            .Where(entity => GetSquaredDistBetween(entity) <= radiusSquared)
+            .Where(e => e != this)
+            .Where(e => e is Food)
+            .Where(e => 
+                GetSquaredDistBetween(Position, e.Position) <= radiusSquared
+            )
             .ToList()
             .Count ?? 0;
     }
@@ -52,6 +47,7 @@ public class Food : Entity
     public Food(FoodType type, int x, int y) 
         : base(x, y, GetTexture("food.png"))
     {
+        FrameSize = new(16, 16);
         _type = type;
         _stage = FoodStage.Sprout;
     }
@@ -61,7 +57,7 @@ public class Food : Entity
 
     public override void Update(List<Entity>? entities)
     {
-        _age += TimeSpan.FromSeconds(GetFrameTime());
+        _age += TimeSpan.FromSeconds(DeltaTime());
         _crowdCount = GetNearbyEntities(entities);
 
         //change stages
@@ -78,43 +74,38 @@ public class Food : Entity
             shouldDie = true;
 
         // reproduce
-        if (shouldDie)
-        {
-            if (_crowdCount < 3)
+        if (shouldDie && _crowdCount < 3)
+            for (int i = 0; i < 2; i++)
             {
-                for (int i = 0; i < 2; i++)
+                int range = _reproductionRadius;
+                Vector2 spawnPoint = Position + new Vector2(
+                    Rng.Next(-range, range + 1), 
+                    Rng.Next(-range, range + 1)
+                );
+                
+                // in bounds
+                if (spawnPoint.X is >= 0 and <= WindowWidth && 
+                    spawnPoint.Y is >= 0 and <= WindowHeight)
                 {
-                    int range = _reproductionRadius;
-                    Vector2 spawnPoint = Position + new Vector2(
-                        Rng.Next(-range, range + 1), 
-                        Rng.Next(-range, range + 1)
-                    );
-                    
-                    // in bounds
-                    if (spawnPoint.X is >= 0 and <= WindowWidth && 
-                        spawnPoint.Y is >= 0 and <= WindowHeight)
-                    {
-                        Children.Add(new Food(_type, spawnPoint));
-                    }
+                    Children.Add(new Food(_type, spawnPoint));
                 }
             }
-        }
+        
 
     }
     public override void Draw()
     {
-        Vector2 size = new(_frameSize, _frameSize);
         DrawTexturePro(
             Texture, 
-            new Rectangle(
-                new Vector2(
-                    (int)_type * _frameSize,
-                    (int)_stage * _frameSize
+            new(
+                new(
+                    (int)_type * FrameSize.X,
+                    (int)_stage * FrameSize.Y
                 ), 
-                size
+                FrameSize
             ), 
-            new Rectangle(Position, size), 
-            size / 2, 0, Color.White
+            new(Position, FrameSize), 
+            new(FrameSize.X / 2, FrameSize.Y), 0, Color.White
         );
 
         /*/tell us how many plants are neearby(degbugging)
