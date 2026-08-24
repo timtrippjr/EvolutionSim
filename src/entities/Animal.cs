@@ -24,8 +24,21 @@ public class Animal : Entity
     public int Sight { get; set; } // affects how far it can see around
 
     //
+    public float MaxHealth { get; set; } = 100;
+    public float Health { get; set; }
     public float MaxHunger { get; set; } = 100;
-    public float Hunger { get; set; }
+    private float _hunger;
+    public float Hunger { get => _hunger; set
+        {
+            if (_hunger < 0)
+            {
+                float remainder = Math.Abs(Hunger);
+                Health -= remainder;
+                _hunger = 0;
+            }
+            else _hunger = value;
+        } 
+    }
     public float MaxThirst { get; set; } = 100;
     public float Thirst { get; set; }
 
@@ -45,6 +58,7 @@ public class Animal : Entity
         Age = age;
         Hunger = MaxHunger;
         Thirst = MaxThirst;
+        Health = MaxHealth;
     }
     public Animal(Vector2 pos) 
         : this(
@@ -105,6 +119,8 @@ public class Animal : Entity
                 break;
         }
         _stateTimeLeft -= newTime;
+
+        if (Health < 0) shouldDie = true;
 
         //update sprite
         //todo

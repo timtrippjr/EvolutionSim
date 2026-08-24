@@ -119,12 +119,20 @@ public class InfoPane
             );
             DrawProgressBar(
                 barRect, 
+                Color.DarkGreen, 
+                animal.Health, 
+                animal.MaxHealth,
+                "health"
+            );
+            barRect.Y = 98;
+            DrawProgressBar(
+                barRect, 
                 Color.DarkBrown, 
                 animal.Hunger, 
                 animal.MaxHunger,
                 "hubger"
             );
-            barRect.Y = 98;
+            barRect.Y = 114;
             DrawProgressBar(
                 barRect, 
                 Color.DarkBlue, 
