@@ -26,31 +26,25 @@ public class SimulationState : State
 
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
             _entities.Add(new Animal(GetRandomPosition()));
-        if (IsMouseButtonPressed(MouseButton.Right))
-            _entities.Add(new Animal(GetMousePosition() / WindowScale));
-        if (IsMouseButtonPressed(MouseButton.Left))
+        if (IsKeyPressed(KeyboardKey.F)||IsKeyPressedRepeat(KeyboardKey.F))
             _entities.Add(new Food(
                 (FoodType)Rng.Next(2), 
                 GetMousePosition() / WindowScale
             ));
-
-        if (IsKeyPressed(KeyboardKey.H))
+        if (IsMouseButtonPressed(MouseButton.Right))
             _hover = null;
+        if (IsMouseButtonPressed(MouseButton.Left))
+            foreach (var e in _entities)
+                if (CheckCollisionPointRec(
+                    GetMousePosition() / WindowScale, 
+                    new(e.Position - e.Origin, e.FrameSize)
+                ))
+                {
+                    _hover = e;
+                    break;
+                }
 
         var snapshot = _entities.ToList();
-        foreach (var e in snapshot)
-        {
-            
-            if (CheckCollisionPointRec(
-                GetMousePosition() / WindowScale, 
-                new(e.Position - e.Origin, e.FrameSize)
-            ))
-            {
-                _hover = e;
-                break;
-            }
-
-        };
         snapshot.ForEach(e => e.Update(snapshot, _hover == e));
 
         var newEntities = _entities
