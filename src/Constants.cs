@@ -11,6 +11,11 @@ public static class Constants
 
     //////////////////
     public const string ResourcesFolder = "res/";
+    public const string ImagesFolder = "images/";
+    public const string ShadersFolder = "shaders/";
+    public const string FontsFolder = "fonts/";
+
+    //////////////////
     public const string IconName = "icon.png";
     public const string FontName = "Bomby.ttf";
     public const int FontHeight = 14;

@@ -23,7 +23,7 @@ public class Entity
         Texture = tex;
         
         //setup shader (why is this complicated)
-        _outlineShader = LoadShader(null, "res/shaders/outline.fs"); 
+        _outlineShader = GetShader("outline.fs");
         int texelSizeLoc = GetShaderLocation(_outlineShader, "texelSize");
         int outlineColorLoc = GetShaderLocation(_outlineShader, "outlineColor");
         Vector2 texelSize = new(1.0f / Texture.Width, 1.0f / Texture.Height);

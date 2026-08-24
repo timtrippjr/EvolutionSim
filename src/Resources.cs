@@ -7,12 +7,14 @@ public static class Resources
 {
     private static Dictionary<string, Image> _images = [];
     private static Dictionary<string, Texture2D> _textures = [];
+    private static Dictionary<string, Shader> _shaders = [];
+
     private static Font _font = 
         LoadFontEx($"{ResourcesFolder}fonts/{FontName}", FontHeight, null, 0);
 
-    private static string GetImagePath(string path)
+    private static string GetPath(string folder, string filename)
     {
-        return ResourcesFolder + "images/" + path;
+        return ResourcesFolder + folder + filename;
     }
 
     public static Font GetFont()
@@ -27,7 +29,7 @@ public static class Resources
         if (!_images.TryGetValue(path, out image))
         {
             Console.WriteLine($"Image \"{path}\" doesn't exist. Creating...");
-            image = LoadImage(GetImagePath(path));
+            image = LoadImage(GetPath(ImagesFolder, path));
             _images[path] = image;
         }
 
@@ -49,7 +51,7 @@ public static class Resources
             else
             {
                 Console.WriteLine("Creating temp image...");
-                temp = LoadImage(GetImagePath(path));
+                temp = LoadImage(GetPath(ImagesFolder, path));
                 texture = LoadTextureFromImage(temp);
                 UnloadImage(temp);
             }
@@ -58,6 +60,20 @@ public static class Resources
         }
 
         return texture;
+    }
+
+    public static Shader GetShader(string path)
+    {
+        Shader shader;
+
+        if (!_shaders.TryGetValue(path, out shader))
+        {
+            Console.WriteLine($"Shader \"{path}\" doesn't exist. Creating...");
+            shader = LoadShader(null, GetPath(ShadersFolder, path));
+            _shaders[path] = shader;
+        }
+
+        return shader;
     }
 
     public static void UnloadAllImages()
