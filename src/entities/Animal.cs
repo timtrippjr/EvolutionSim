@@ -19,6 +19,7 @@ public class Animal : Entity
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
 
     // existence stuff
+    public string Name { get; set; }
     public Color Color { get; set; }
     public int Speed { get; set; } // affects speed
     public int Sight { get; set; } // affects how far it can see around
@@ -56,6 +57,7 @@ public class Animal : Entity
         Speed = speed;
         Sight = sight;
         Age = age;
+        Name = NameGenerator.GetRandomName(2, 10);
         Hunger = MaxHunger;
         Thirst = MaxThirst;
         Health = MaxHealth;
@@ -95,7 +97,8 @@ public class Animal : Entity
                 break;
             case AnimalState.Walking:
                 //stateOver = have I reached goal?
-                //in my current direction, is my distance from origin bigger than Sight from origin
+                //in my current direction, 
+                //is my distance from origin bigger than Sight from origin
                 Vector2 direction = new(
                     (float)Math.Cos(_moveDirection),
                     (float)Math.Sin(_moveDirection)

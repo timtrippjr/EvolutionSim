@@ -3,145 +3,128 @@ namespace EvolutionSim;
 public class InfoPane
 {
     private bool _infoPaneOnRight = true;
+    private int _padding = 4;
+    private int _width = 120;
+    private int _lineThick = 2;
+    private Color _bgCol = new(14, 35, 69, 140);
+    private Color _lineCol = new(207, 196, 0);
+    private Rectangle _rect;
 
+    //uitext
+    private int _textX;
+    private int _textY;
+
+    private void DrawUIText(string text, Color color, int scalar)
+    {
+        DrawFont(text, color, scalar, _textX, _textY);
+        _textY += (FontHeight * scalar) + _padding;
+    }
+    private void DrawUIText(string text, Color color)
+    {
+        DrawUIText(text, color, 1);
+    }
     private void DrawProgressBar(
-        Rectangle rect, 
-        Color color,
-        float part, 
-        float whole,
-        string text
+        Color color, float part, float whole, string text
     )
     {
+        Rectangle barRect = new(
+            _rect.X + _padding, 
+            _textY, 
+            _rect.Width - _padding * 2, 
+            14
+        );
         float percent = part / whole;
-        DrawRectangleRec(rect, Color.Black);
+        DrawRectangleRec(barRect, Color.Black);
         DrawRectangleV(
-            rect.Position, 
-            rect.Size * new Vector2(percent, 1), 
+            barRect.Position, 
+            barRect.Size * new Vector2(percent, 1), 
             color
         );
-        DrawRectangleLinesEx(rect, 1, Color.Black);
-        DrawFontV(text, Color.White, 1, rect.Position);
+        DrawRectangleLinesEx(barRect, 1, Color.Black);
+        DrawFontV(text, Color.White, 1, barRect.Position);
+        _textY += FontHeight + _padding;
+    }
+
+    private void DrawFood(Food food)
+    {
+        DrawUIText($"type: {food.Type}", Color.Gray);
+        DrawUIText($"stage: {food.Stage}", Color.Gray);
+    }
+
+    private void DrawAnimal(Animal animal)
+    {
+        // color speed sight hunger
+        DrawUIText(animal.Name, Color.White);
+
+        DrawRectangle(_textX + 40, _textY, 12, 12, animal.Color);
+        DrawUIText("color:", animal.Color);
+        
+        DrawUIText($"sight: {animal.Sight}", Color.Gray);
+        DrawUIText($"speed: {animal.Speed}", Color.Gray);
+
+        //these should be bars
+        //hunger bar
+        DrawProgressBar(
+            Color.DarkGreen, 
+            animal.Health, 
+            animal.MaxHealth,
+            "health"
+        );
+        DrawProgressBar(
+            Color.DarkBrown, 
+            animal.Hunger, 
+            animal.MaxHunger,
+            "hubger"
+        );
+        DrawProgressBar(
+            Color.DarkBlue, 
+            animal.Thirst, 
+            animal.MaxThirst,
+            "thirst"
+        );
+        //thirst bar
+        // then, create reproduction bar, maybe intelligence bar?
     }
 
     public void Draw(Entity? hover)
     {
         if (hover == null) return;
-    
-        int infoPanePadding = 4;
-        int infoPaneWidth = 120;
-        int infoPaneLineThickness = 2;
-        Color infoPaneBgColor = new(14, 35, 69, 140);
-        Color infoPaneLineColor = new(207, 196, 0);
 
-        Rectangle infoPaneRect = new(
-            infoPanePadding, 
-            infoPanePadding, 
-            infoPaneWidth, 
-            WindowHeight - (infoPanePadding * 2)
+        _rect = new(
+            _padding, _padding, 
+            _width, WindowHeight - (_padding * 2)
         );
-
-        int mouseX = GetMouseX() / WindowScale;
-        if (mouseX < infoPaneRect.X + infoPaneRect.Width)
-            _infoPaneOnRight = true;
-        if (mouseX > WindowWidth - infoPaneRect.Width - infoPanePadding)
-            _infoPaneOnRight = false;
-
         Vector2 lineStart = new(
-            infoPaneRect.X + infoPaneRect.Width,
-            infoPaneRect.Y + 50
+            _rect.X + _rect.Width,
+            _rect.Y + 50
         );
         Vector2 lineEnd = new(
             hover.Position.X - hover.FrameSize.X / 2,
             hover.Position.Y - hover.FrameSize.Y / 2
         );
-        
         if (_infoPaneOnRight)
         {
-            infoPaneRect.X = 
-                WindowWidth - 
-                infoPaneRect.Width - 
-                infoPanePadding;
-            lineStart.X = infoPaneRect.X;
+            _rect.X = WindowWidth - _rect.Width - _padding;
+            lineStart.X = _rect.X;
             lineEnd.X = hover.Position.X + hover.FrameSize.X / 2;
         }
 
-        DrawRectangleRec(infoPaneRect, infoPaneBgColor);
-        DrawRectangleLinesEx(
-            infoPaneRect, 
-            infoPaneLineThickness, 
-            infoPaneLineColor
-        );
-        DrawLineEx(
-            lineStart, 
-            lineEnd, 
-            infoPaneLineThickness, 
-            infoPaneLineColor
+        if (CheckCollisionPointRec(GetMousePosition() / WindowScale, _rect))
+            _infoPaneOnRight = !_infoPaneOnRight;
+
+        DrawRectangleRec(_rect, _bgCol);
+        DrawRectangleLinesEx(_rect, _lineThick, _lineCol);
+        DrawLineEx(lineStart, lineEnd, _lineThick, _lineCol);
+
+        _textX = (int)_rect.Position.X + _padding;
+        _textY = 8;
+        DrawUIText(hover.GetType().Name, Color.White, 2);
+        DrawUIText(
+            $"{hover.Age.Minutes:D2}:{hover.Age.Seconds:D2} seconds old", 
+            Color.Gray
         );
 
-        int infoPaneTextX = (int)infoPaneRect.Position.X + infoPanePadding;
-        DrawFont(hover.GetType().Name, 
-            Color.White, 2, infoPaneTextX, 6
-        );
-        DrawFont(
-            $"{hover.Age.Minutes:D2}:{hover.Age.Seconds:D2} seconds old",
-            Color.Gray, 1, infoPaneTextX, 32
-        );
-        if (hover is Food food)
-        {
-            DrawFont($"type: {food.Type}", 
-                Color.Gray, 1, infoPaneTextX, 42
-            );
-            DrawFont($"stage: {food.Stage}", 
-                Color.Gray, 1, infoPaneTextX, 52
-            );
-        }
-        if (hover is Animal animal)
-        {
-            // color speed sight hunger
-            DrawFont("color:", 
-                animal.Color, 1, infoPaneTextX, 42
-            );
-            DrawRectangle(infoPaneTextX + 40, 44, 10, 10, animal.Color);
-            DrawFont($"sight: {animal.Sight}", 
-                Color.Gray, 1, infoPaneTextX, 52
-            );
-            DrawFont($"speed: {animal.Speed}", 
-                Color.Gray, 1, infoPaneTextX, 62
-            );
-            //these should be bars
-            
-            //hunger bar
-            Rectangle barRect = new(
-                infoPaneRect.X + infoPanePadding, 
-                82, 
-                infoPaneRect.Width - infoPanePadding * 2, 
-                14
-            );
-            DrawProgressBar(
-                barRect, 
-                Color.DarkGreen, 
-                animal.Health, 
-                animal.MaxHealth,
-                "health"
-            );
-            barRect.Y = 98;
-            DrawProgressBar(
-                barRect, 
-                Color.DarkBrown, 
-                animal.Hunger, 
-                animal.MaxHunger,
-                "hubger"
-            );
-            barRect.Y = 114;
-            DrawProgressBar(
-                barRect, 
-                Color.DarkBlue, 
-                animal.Thirst, 
-                animal.MaxThirst,
-                "thirst"
-            );
-            //thirst bar
-            // then, create reproduction bar, maybe intelligence bar?
-        }
+        if (hover is Food food) DrawFood(food);
+        if (hover is Animal animal) DrawAnimal(animal);
     }
 }
