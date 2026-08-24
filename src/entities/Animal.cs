@@ -93,6 +93,8 @@ public class Animal : Entity
                 //sight is the hypotenuse of the triangle
                 //theta is the random direction we pick
 
+                Hunger -= Speed * 0.001f;
+
                 Position += direction * Speed * DeltaTime();
 
                 if (stateOver)
