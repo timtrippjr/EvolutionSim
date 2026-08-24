@@ -112,9 +112,9 @@ public class InfoPane
         if (CheckCollisionPointRec(GetMousePosition() / WindowScale, _rect))
             _infoPaneOnRight = !_infoPaneOnRight;
 
+        DrawLineEx(lineStart, lineEnd, _lineThick, _lineCol);
         DrawRectangleRec(_rect, _bgCol);
         DrawRectangleLinesEx(_rect, _lineThick, _lineCol);
-        DrawLineEx(lineStart, lineEnd, _lineThick, _lineCol);
 
         _textX = (int)_rect.Position.X + _padding;
         _textY = 8;
