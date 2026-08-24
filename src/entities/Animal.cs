@@ -19,14 +19,15 @@ public class Animal : Entity
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
 
     // existence stuff
-    private Color _color;
-    private int _speed; // affects speed
-    private int _sight; // affects how far it can see around
+    public Color Color { get; set; }
+    public int Speed { get; set; } // affects speed
+    public int Sight { get; set; } // affects how far it can see around
 
     //
-    private TimeSpan _age; // TimeSpan.Zero
-    private float _hunger = 1;
-    private float _thirst;
+    public float MaxHunger { get; set; } = 100;
+    public float Hunger { get; set; }
+    public float MaxThirst { get; set; } = 100;
+    public float Thirst { get; set; }
 
     public Animal(
         int x, 
@@ -38,10 +39,12 @@ public class Animal : Entity
     ) 
         : base(x, y, GetTexture("animal.png"))
     {
-        _color = color;
-        _speed = speed;
-        _sight = sight;
-        _age = age;
+        Color = color;
+        Speed = speed;
+        Sight = sight;
+        Age = age;
+        Hunger = MaxHunger;
+        Thirst = MaxThirst;
     }
     public Animal(Vector2 pos) 
         : this(
@@ -59,7 +62,7 @@ public class Animal : Entity
         base.Update(entities, beingHovered);
 
         TimeSpan newTime = TimeSpan.FromSeconds(DeltaTime());
-        _age += newTime;
+        Age += newTime;
 
         bool stateOver = _stateTimeLeft < TimeSpan.Zero;
         switch (_state)
@@ -78,19 +81,19 @@ public class Animal : Entity
                 break;
             case AnimalState.Walking:
                 //stateOver = have I reached goal?
-                //in my current direction, is my distance from origin bigger than _sight from origin
+                //in my current direction, is my distance from origin bigger than Sight from origin
                 Vector2 direction = new(
                     (float)Math.Cos(_moveDirection),
                     (float)Math.Sin(_moveDirection)
                 );
                 stateOver = 
                     GetSquaredDistBetween(Position, _moveOrigin) > 
-                    _sight * _sight;
+                    Sight * Sight;
 
                 //sight is the hypotenuse of the triangle
                 //theta is the random direction we pick
 
-                Position += direction * _speed * DeltaTime();
+                Position += direction * Speed * DeltaTime();
 
                 if (stateOver)
                 {
@@ -107,7 +110,7 @@ public class Animal : Entity
 
     public override void Draw()
     {
-        float scalar = (float)_age.TotalMinutes / 2 + (_baseFrameSize.X / 60);
+        float scalar = (float)Age.TotalMinutes / 2 + (_baseFrameSize.X / 60);
         FrameSize = new(
             Math.Min(_baseFrameSize.X, _baseFrameSize.X * scalar),
             Math.Min(_baseFrameSize.Y, _baseFrameSize.Y * scalar)
@@ -117,7 +120,7 @@ public class Animal : Entity
             DrawTexturePro(Texture, 
                 new(Vector2.Zero, _baseFrameSize), 
                 new(Position, FrameSize), 
-                Origin, 0, _color
+                Origin, 0, Color
             );
         if (_beingHovered) EndShaderMode();   
     }

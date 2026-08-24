@@ -4,7 +4,12 @@ namespace EvolutionSim;
 
 public static class Utility
 {
-    public static void DrawFont(string text, Color color, int scalar, int x, int y)
+    public static void DrawFont(
+        string text, 
+        Color color, 
+        int scalar, 
+        int x, int y
+    )
     {
         DrawTextEx(
             GetFont(), 
@@ -14,6 +19,15 @@ public static class Utility
             FontSpacing * scalar, 
             color
         );
+    }
+    public static void DrawFontV(
+        string text, 
+        Color color, 
+        int scalar,
+        Vector2 pos
+    )
+    {
+        DrawFont(text, color, scalar, (int)pos.X, (int)pos.Y);
     }
 
     public static Color GetRandomColor(int minimum = 0)

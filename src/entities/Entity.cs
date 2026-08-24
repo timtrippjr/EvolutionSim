@@ -3,6 +3,7 @@ namespace EvolutionSim;
 public class Entity
 {
     public List<Entity> Children { get; set; } = new List<Entity>();
+    public TimeSpan Age { get; set; } = TimeSpan.Zero;
     public Vector2 Position { get; set; }
     public Texture2D Texture { get; set; }
     public Vector2 FrameSize { get; set; }

@@ -4,6 +4,7 @@ public class SimulationState : State
 {
     private List<Entity> _entities = [];
     private Entity? _hover;
+    private InfoPane _infoPane = new InfoPane();
 
     public override void Enter()
     {
@@ -32,6 +33,9 @@ public class SimulationState : State
                 (FoodType)Rng.Next(2), 
                 GetMousePosition() / WindowScale
             ));
+
+        if (IsKeyPressed(KeyboardKey.H))
+            _hover = null;
 
         var snapshot = _entities.ToList();
         foreach (var e in snapshot)
@@ -65,6 +69,8 @@ public class SimulationState : State
             .OrderBy(e => e.Position.Y)
             .ToList()
             .ForEach(e => e.Draw());
+
+        _infoPane.Draw(_hover);
         
     }
 }

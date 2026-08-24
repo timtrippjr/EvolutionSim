@@ -16,7 +16,6 @@ public enum FoodStage
 public class Food : Entity
 {
     private TimeSpan _lifespan = TimeSpan.FromSeconds(Rng.Next(90, 110));
-    private TimeSpan _age = TimeSpan.Zero;
 
     private Dictionary<FoodStage, TimeSpan> _stageThresholds = new(){
         {FoodStage.Sprout, TimeSpan.Zero},
@@ -24,8 +23,8 @@ public class Food : Entity
         {FoodStage.Budding, TimeSpan.FromSeconds(Rng.Next(30, 35))},
         {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(35, 45))},
     };
-    private FoodType _type;
-    private FoodStage _stage;
+    public FoodType Type { get; set; }
+    public FoodStage Stage { get; set; }
     
     private int _overcrowdingAmount = 4;
     private static float _crowdRadius = 40;
@@ -48,8 +47,8 @@ public class Food : Entity
         : base(x, y, GetTexture("food.png"))
     {
         FrameSize = new(16, 16);
-        _type = type;
-        _stage = FoodStage.Sprout;
+        Type = type;
+        Stage = FoodStage.Sprout;
     }
     public Food(FoodType type, Vector2 pos) 
         : this(type, (int)pos.X, (int)pos.Y)
@@ -59,18 +58,18 @@ public class Food : Entity
     {
         base.Update(entities, beingHovered);
 
-        _age += TimeSpan.FromSeconds(DeltaTime());
+        Age += TimeSpan.FromSeconds(DeltaTime());
         _crowdCount = GetNearbyEntities(entities);
 
         //change stages
         for (int i = 0; i < _stageThresholds.Count; i++)
         {
             FoodStage stage = (FoodStage)i;
-            if (_age >= _stageThresholds[stage])
-                _stage = stage;
+            if (Age >= _stageThresholds[stage])
+                Stage = stage;
         }
 
-        if (_age > _lifespan)
+        if (Age > _lifespan)
             shouldDie = true;
         if (_crowdCount > _overcrowdingAmount)
             shouldDie = true;
@@ -89,7 +88,7 @@ public class Food : Entity
                 if (spawnPoint.X is >= 0 and <= WindowWidth && 
                     spawnPoint.Y is >= 0 and <= WindowHeight)
                 {
-                    Children.Add(new Food(_type, spawnPoint));
+                    Children.Add(new Food(Type, spawnPoint));
                 }
             }
         
@@ -102,8 +101,8 @@ public class Food : Entity
             Texture, 
             new(
                 new(
-                    (int)_type * FrameSize.X,
-                    (int)_stage * FrameSize.Y
+                    (int)Type * FrameSize.X,
+                    (int)Stage * FrameSize.Y
                 ), 
                 FrameSize
             ), 
