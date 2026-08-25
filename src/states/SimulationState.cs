@@ -13,9 +13,9 @@ public class SimulationState : State
     public override void Enter()
     {
         
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 2; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 20; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 GetRandomPosition()
@@ -83,7 +83,7 @@ public class SimulationState : State
         //
 
         if (IsKeyPressed(KeyboardKey.H))
-            if (_hover is Animal a) a.Health -= 20;
+            if (_hover is Animal a) a.Energy += 20;
         if (_hover?.shouldDie ?? false) _hover = null;
 
         var snapshot = _entities.ToList();
