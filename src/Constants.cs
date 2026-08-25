@@ -23,5 +23,8 @@ public static class Constants
     public const float TimeMultiple = 1;
 
     //////////////////
+    public static readonly Color DarkerGray = new(32, 32, 32);
+
+    //////////////////
     public static readonly Random Rng = new();
 }

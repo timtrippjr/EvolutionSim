@@ -6,6 +6,10 @@ public class SimulationState : State
     private Entity? _hover;
     private InfoPane _infoPane = new();
 
+    private Camera2D _camera;
+    public Camera2D Camera => _camera;
+    private float _zoomTarget;
+
     public override void Enter()
     {
         
@@ -17,6 +21,31 @@ public class SimulationState : State
                 GetRandomPosition()
             ));
 
+        _camera.Target = Vector2.Zero;
+        _camera.Offset = Vector2.Zero;
+        _camera.Zoom = 1.0f;
+        _zoomTarget = 1.0f;
+
+    }
+
+    public void Update_camera()
+    {
+		Vector2 mouseScreen = GetMousePosition() / WindowScale;
+		Vector2 preZoomWorldPos = GetScreenToWorld2D(mouseScreen, _camera);
+
+        _zoomTarget += GetMouseWheelMove() * 0.1f;
+        _camera.Zoom = SmoothDamp(_camera.Zoom, _zoomTarget, 6);
+        
+		Vector2 postZoomWorldPos = GetScreenToWorld2D(mouseScreen, _camera);
+
+		_camera.Target += preZoomWorldPos - postZoomWorldPos;
+        if (IsMouseButtonDown(MouseButton.Right))
+            _camera.Target -= GetMouseDelta() / WindowScale / _camera.Zoom;
+
+        //reset buttons
+        if (IsKeyPressed(KeyboardKey.One))
+            _zoomTarget = 1;
+        
     }
 
     public override void Update()
@@ -31,12 +60,12 @@ public class SimulationState : State
                 (FoodType)Rng.Next(2), 
                 GetRandomPosition()
             ));
-        if (IsMouseButtonPressed(MouseButton.Right))
-            _hover = null;
         if (IsMouseButtonPressed(MouseButton.Left))
             foreach (var e in _entities)
                 if (CheckCollisionPointRec(
-                    GetMousePosition() / WindowScale, 
+                    GetScreenToWorld2D(
+                        GetMousePosition() / WindowScale, _camera
+                    ),
                     new(e.Position - e.Origin, e.FrameSize)
                 ))
                 {
@@ -45,9 +74,12 @@ public class SimulationState : State
                     break;
                 }
 
+        //_camera
+        Update_camera();
+        //
+
         if (IsKeyPressed(KeyboardKey.H))
             if (_hover is Animal a) a.Health -= 20;
-
         if (_hover?.shouldDie ?? false) _hover = null;
 
         var snapshot = _entities.ToList();
@@ -63,14 +95,21 @@ public class SimulationState : State
     }
     public override void Draw()
     {
-        ClearBackground(Color.DarkGray);
-        
-        _entities
-            .OrderBy(e => e.Position.Y)
-            .ToList()
-            .ForEach(e => e.Draw());
+        BeginMode2D(_camera);
+            ClearBackground(DarkerGray);
+            DrawRectangle(0, 0, WindowWidth, WindowHeight, Color.DarkGray);
+            DrawRectangleLinesEx(
+                new(-1, -1, WindowWidth + 1, WindowHeight + 1), 
+                1, 
+                Color.Black
+            );
+            _entities
+                .OrderBy(e => e.Position.Y)
+                .ToList()
+                .ForEach(e => e.Draw());
+        EndMode2D();
 
-        _infoPane.Draw(_hover);
+        _infoPane.Draw(_hover, _camera);
         
     }
 }

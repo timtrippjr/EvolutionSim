@@ -32,6 +32,7 @@ public class Animal : Entity
     private Vector2 _baseFrameSize = new(32, 32);
     private AnimalState _state = AnimalState.Standing;
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
+    private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(2);
 
     // existence stuff
     public string Name { get; set; }
@@ -154,6 +155,7 @@ public class Animal : Entity
         _stateTimeLeft -= newTime;
 
         if (Health <= 0) shouldDie = true;
+        if (Age > _lifeExpectancy) shouldDie = true;
 
         //update sprite
         //todo

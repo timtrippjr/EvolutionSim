@@ -76,7 +76,7 @@ public class InfoPane
         // then, create reproduction bar, maybe intelligence bar?
     }
 
-    public void Draw(Entity? hover)
+    public void Draw(Entity? hover, Camera2D cam)
     {
         if (hover == null) return;
 
@@ -88,6 +88,7 @@ public class InfoPane
             _rect.X + _rect.Width,
             _rect.Y + 50
         );
+        Vector2 lineEnd = (hover.Position - cam.Target) * cam.Zoom;
         if (_infoPaneOnRight)
         {
             _rect.X = WindowWidth - _rect.Width - _padding;
@@ -97,11 +98,7 @@ public class InfoPane
         if (CheckCollisionPointRec(GetMousePosition() / WindowScale, _rect))
             _infoPaneOnRight = !_infoPaneOnRight;
 
-        //draw thing over for layering things
-        //also, ideally draw the animal's sight range here
-        hover.Draw();
-
-        DrawLineEx(lineStart, hover.Position, _lineThick, _lineCol);
+        DrawLineEx(lineStart, lineEnd, _lineThick, _lineCol);
         DrawRectangleRec(_rect, _bgCol);
         DrawRectangleLinesEx(_rect, _lineThick, _lineCol);
 

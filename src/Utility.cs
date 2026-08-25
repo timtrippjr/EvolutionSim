@@ -59,4 +59,20 @@ public static class Utility
     {
         return GetFrameTime() * TimeMultiple;
     }
+
+    public static float SmoothDamp(float current, float target, float lambda)
+    {
+        return current + (target - current) * (
+            1.0f - MathF.Exp(-lambda * DeltaTime())
+        );
+    }
+
+    public static Vector2 SmoothDampV(Vector2 current, Vector2 target, float lambda)
+    {
+        return Vector2.Lerp(
+            current, 
+            target, 
+            1.0f - MathF.Exp(-lambda * DeltaTime())
+        );
+    }
 }
