@@ -29,7 +29,7 @@ public class SimulationState : State
         if (IsKeyPressed(KeyboardKey.F)||IsKeyPressedRepeat(KeyboardKey.F))
             _entities.Add(new Food(
                 (FoodType)Rng.Next(2), 
-                GetMousePosition() / WindowScale
+                GetRandomPosition()
             ));
         if (IsMouseButtonPressed(MouseButton.Right))
             _hover = null;
