@@ -28,7 +28,7 @@ public class SimulationState : State
 
     }
 
-    public void Update_camera()
+    public void UpdateCamera()
     {
 		Vector2 mouseScreen = GetMousePosition() / WindowScale;
 		Vector2 preZoomWorldPos = GetScreenToWorld2D(mouseScreen, _camera);
@@ -75,7 +75,7 @@ public class SimulationState : State
                 }
 
         //_camera
-        Update_camera();
+        UpdateCamera();
         //
 
         if (IsKeyPressed(KeyboardKey.H))
