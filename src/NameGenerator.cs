@@ -50,10 +50,11 @@ public class NameGenerator
 
         new("sh", 7), new("ch", 7), 
         
-        new("dr", 6), 
+        new("dr", 6), new("qu", 6), new("pl", 6),
         new("sl", 6), new("br", 6), 
 
         new("nd", 5), new("lt", 5), new("mb", 5), new("nf", 5), new("mf", 5),
+        new("lk", 5), new("lc", 5), new("sc", 5),
 
         new("zz", 4), new("ll", 4),
 

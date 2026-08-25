@@ -14,10 +14,14 @@ public class InfoPane
     private int _textX;
     private int _textY;
 
+    private void LineBreak()
+    {
+        _textY += FontHeight + 1;
+    }
     private void DrawUIText(string text, Color color, int scalar)
     {
         DrawFont(text, color, scalar, _textX, _textY);
-        _textY += (FontHeight * scalar) + _padding;
+        for (int i = 0; i < scalar; i++) LineBreak();
     }
     private void DrawUIText(string text, Color color)
     {
@@ -42,25 +46,27 @@ public class InfoPane
         );
         DrawRectangleLinesEx(barRect, 1, Color.Black);
         DrawFontV(text, Color.White, 1, barRect.Position);
-        _textY += FontHeight + _padding;
+        LineBreak();
     }
 
     private void DrawFood(Food food)
     {
-        DrawUIText($"type: {food.Type}", Color.Gray);
-        DrawUIText($"stage: {food.Stage}", Color.Gray);
+        DrawUIText($"type: {food.Type}", Color.White);
+        DrawUIText($"stage: {food.Stage}", Color.White);
     }
 
     private void DrawAnimal(Animal animal)
     {
         // color speed sight hunger
         DrawUIText(animal.Name, Color.White);
+        LineBreak();
 
         DrawRectangle(_textX + 40, _textY, 12, 12, animal.Color);
         DrawUIText("color:", animal.Color);
         
-        DrawUIText($"sight: {animal.Sight}", Color.Gray);
-        DrawUIText($"speed: {animal.Speed}", Color.Gray);
+        DrawUIText($"sight: {animal.Sight}", Color.White);
+        DrawUIText($"speed: {animal.Speed}", Color.White);
+        LineBreak();
 
         //these should be bars
         //hunger bar
@@ -98,21 +104,19 @@ public class InfoPane
             _rect.X + _rect.Width,
             _rect.Y + 50
         );
-        Vector2 lineEnd = new(
-            hover.Position.X - hover.FrameSize.X / 2,
-            hover.Position.Y - hover.FrameSize.Y / 2
-        );
         if (_infoPaneOnRight)
         {
             _rect.X = WindowWidth - _rect.Width - _padding;
             lineStart.X = _rect.X;
-            lineEnd.X = hover.Position.X + hover.FrameSize.X / 2;
         }
 
         if (CheckCollisionPointRec(GetMousePosition() / WindowScale, _rect))
             _infoPaneOnRight = !_infoPaneOnRight;
 
-        DrawLineEx(lineStart, lineEnd, _lineThick, _lineCol);
+        //draw thing over for layering things
+        hover.Draw();
+
+        DrawLineEx(lineStart, hover.Position, _lineThick, _lineCol);
         DrawRectangleRec(_rect, _bgCol);
         DrawRectangleLinesEx(_rect, _lineThick, _lineCol);
 
@@ -123,6 +127,7 @@ public class InfoPane
             $"{hover.Age.Minutes:D2}:{hover.Age.Seconds:D2} seconds old", 
             Color.Gray
         );
+        LineBreak();
 
         if (hover is Food food) DrawFood(food);
         if (hover is Animal animal) DrawAnimal(animal);

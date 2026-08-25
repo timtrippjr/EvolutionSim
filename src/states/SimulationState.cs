@@ -4,14 +4,14 @@ public class SimulationState : State
 {
     private List<Entity> _entities = [];
     private Entity? _hover;
-    private InfoPane _infoPane = new InfoPane();
+    private InfoPane _infoPane = new();
 
     public override void Enter()
     {
         
         for (int i = 0; i < 5; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 50; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 GetRandomPosition()
@@ -40,7 +40,8 @@ public class SimulationState : State
                     new(e.Position - e.Origin, e.FrameSize)
                 ))
                 {
-                    _hover = e;
+                    if (_hover == e) _hover = null;
+                    else _hover = e;
                     break;
                 }
 
