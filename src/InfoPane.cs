@@ -70,24 +70,8 @@ public class InfoPane
 
         //these should be bars
         //hunger bar
-        DrawProgressBar(
-            Color.DarkGreen, 
-            animal.Health, 
-            animal.MaxHealth,
-            "health"
-        );
-        DrawProgressBar(
-            Color.DarkBrown, 
-            animal.Hunger, 
-            animal.MaxHunger,
-            "hubger"
-        );
-        DrawProgressBar(
-            Color.DarkBlue, 
-            animal.Thirst, 
-            animal.MaxThirst,
-            "thirst"
-        );
+        foreach (BarItem bar in animal.BarValues)
+            DrawProgressBar(bar.Color, bar.Part, bar.Whole, bar.Name);
         //thirst bar
         // then, create reproduction bar, maybe intelligence bar?
     }
@@ -114,6 +98,7 @@ public class InfoPane
             _infoPaneOnRight = !_infoPaneOnRight;
 
         //draw thing over for layering things
+        //also, ideally draw the animal's sight range here
         hover.Draw();
 
         DrawLineEx(lineStart, hover.Position, _lineThick, _lineCol);

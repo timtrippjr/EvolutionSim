@@ -45,6 +45,11 @@ public class SimulationState : State
                     break;
                 }
 
+        if (IsKeyPressed(KeyboardKey.H))
+            if (_hover is Animal a) a.Health -= 20;
+
+        if (_hover?.shouldDie ?? false) _hover = null;
+
         var snapshot = _entities.ToList();
         snapshot.ForEach(e => e.Update(snapshot, _hover == e));
 

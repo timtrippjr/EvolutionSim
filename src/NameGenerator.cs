@@ -5,63 +5,48 @@ namespace EvolutionSim;
 
 public class NameGenerator
 {
-    private class Syllable
-    {
-        public string? Value { get; set; }
-        public int Location { get; set; }
-        public Syllable(string value, int location)
-        {
-            Value = value;
-            Location = location;
-        }
-    }
-
     //end = 1, begin = 2, mid = 4
-    private static Syllable[] _vowels =
+    private static (string, int)[] _vowels =
     {
-        new("a", 7), new("o", 7), new("i", 7), new("o", 7), new("u", 7), new("y", 1),
+        ("a", 7), ("o", 7), ("i", 7), ("o", 7), ("u", 7), ("y", 1),
         
         // repeats
-        new("a", 7), new("o", 7), new("i", 7), new("o", 7), new("u", 7), new("y", 1),
-        new("a", 7), new("o", 7), new("i", 7), new("o", 7), new("u", 7), new("y", 1),
-        new("a", 7), new("o", 7), new("i", 7), new("o", 7), new("u", 7), new("y", 1),
-        new("a", 7), new("o", 7), new("i", 7), new("o", 7), new("u", 7), new("y", 1),
+        ("a", 7), ("o", 7), ("i", 7), ("o", 7), ("u", 7), ("y", 1),
+        ("a", 7), ("o", 7), ("i", 7), ("o", 7), ("u", 7), ("y", 1),
+        ("a", 7), ("o", 7), ("i", 7), ("o", 7), ("u", 7), ("y", 1),
+        ("a", 7), ("o", 7), ("i", 7), ("o", 7), ("u", 7), ("y", 1),
 
         // biletter
-        new("oi", 5), new("ou", 5), 
-        new("ie", 5), new("ai", 5),
+        ("oi", 5), ("ou", 5), 
+        ("ie", 5), ("ai", 5),
     };
-    private static Syllable[] _consonants =
+    private static (string, int)[] _consonants =
     {
-        new("c", 7), new("d", 7), new("b", 7), new("p", 7), new("m", 7),
-        new("n", 7), new("l", 7), new("f", 7), new("t", 7), new("j", 7),
-        new("r", 7), new("g", 7), new("v", 7), new("w", 7),
+        ("c", 7), ("d", 7), ("b", 7), ("p", 7), ("m", 7), ("n", 7), ("l", 7), 
+        ("f", 7), ("t", 7), ("j", 7), ("r", 7), ("g", 7), ("v", 7), ("w", 7),
         
         //repeats
-        new("c", 7), new("d", 7), new("b", 7), new("p", 7), new("m", 7),
-        new("n", 7), new("l", 7), new("f", 7), new("t", 7), new("j", 7),
-        new("r", 7), new("g", 7), new("v", 7), new("w", 7),
-        new("c", 7), new("d", 7), new("b", 7), new("p", 7), new("m", 7),
-        new("n", 7), new("l", 7), new("f", 7), new("t", 7), new("j", 7),
-        new("r", 7), new("g", 7), new("v", 7), new("w", 7),
+        ("c", 7), ("d", 7), ("b", 7), ("p", 7), ("m", 7), ("n", 7), ("l", 7), 
+        ("f", 7), ("t", 7), ("j", 7), ("r", 7), ("g", 7), ("v", 7), ("w", 7),
+        ("c", 7), ("d", 7), ("b", 7), ("p", 7), ("m", 7), ("n", 7), ("l", 7), 
+        ("f", 7), ("t", 7), ("j", 7), ("r", 7), ("g", 7), ("v", 7), ("w", 7),
         /////
+
+
+        ("sh", 7), ("ch", 7), 
         
+        ("dr", 6), ("qu", 6), ("pl", 6),
+        ("sl", 6), ("br", 6), 
 
+        ("nd", 5), ("lt", 5), ("mb", 5), ("nf", 5), ("mf", 5),
+        ("lk", 5), ("lc", 5), ("sc", 5), ("nt", 5),
 
-        new("sh", 7), new("ch", 7), 
+        ("zz", 4), ("ll", 4),
+
+        ("k", 3), 
+        ("th", 2), 
         
-        new("dr", 6), new("qu", 6), new("pl", 6),
-        new("sl", 6), new("br", 6), 
-
-        new("nd", 5), new("lt", 5), new("mb", 5), new("nf", 5), new("mf", 5),
-        new("lk", 5), new("lc", 5), new("sc", 5),
-
-        new("zz", 4), new("ll", 4),
-
-        new("k", 3), 
-        new("th", 2), 
-        
-        new("hn", 1), new("ck", 1), new("nk", 1), new("x", 1), new("rd", 1)
+        ("hn", 1), ("ck", 1), ("nk", 1), ("x", 1), ("rd", 1)
     };
 
     public static string GetRandomName(int minsyl, int maxsyl)
@@ -69,14 +54,14 @@ public class NameGenerator
         string result = "";
 
         int leng = Rng.Next(minsyl, maxsyl);
-        bool isvowel = Rng.Next(0, 1) != 0;
+        bool isVowel = Rng.Next(0, 1) != 0;
 
-        Syllable syll;
+        (string Value, int Location) syll;
         for (int i = 1; i <= leng; i++)
         {
             do
             {
-                if (isvowel) 
+                if (isVowel) 
                     syll = _vowels[Rng.Next(_vowels.Length)];
                 else
                     syll = _consonants[Rng.Next(0, _consonants.Length)];
@@ -90,10 +75,10 @@ public class NameGenerator
             }while(true);
 
             result += syll.Value;
-            isvowel = !isvowel;
+            isVowel = !isVowel;
         }
 
-        return  char.ToUpper(result[0]) + result[1..];
+        return char.ToUpper(result[0]) + result[1..];
     }
 
     public static string GetRandomName(int syll)

@@ -1,5 +1,20 @@
 namespace EvolutionSim;
 
+public struct BarItem
+{
+    public string Name;
+    public float Part;
+    public float Whole;
+    public Color Color;
+    public BarItem(string name, float part, float whole, Color color)
+    {
+        Name = name;
+        Part = part;
+        Whole = whole;
+        Color = color;
+    }
+}
+
 enum AnimalState
 {
     Standing,
@@ -42,6 +57,21 @@ public class Animal : Entity
     }
     public float MaxThirst { get; set; } = 100;
     public float Thirst { get; set; }
+    private readonly BarItem[] _bars = new BarItem[3];
+    public BarItem[] BarValues
+    {
+        get
+        {
+            _bars[0] = new("Health", Health, MaxHealth, Color.DarkGreen);
+            _bars[1] = new("Hunger", Hunger, MaxHunger, Color.DarkBrown);
+            _bars[2] = new("Thirst", Thirst, MaxThirst, Color.DarkBlue);
+            
+            Array.Sort(_bars, (a, b) => a.Part.CompareTo(b.Part));
+
+            return _bars;
+        }
+    }
+
 
     public Animal(
         int x, 
@@ -68,7 +98,7 @@ public class Animal : Entity
             (int)pos.Y, 
             GetRandomColor(),
             Rng.Next(10, 20),
-            Rng.Next(80, 100),
+            Rng.Next(20, 60),
             TimeSpan.Zero
         ) 
     {}
@@ -123,7 +153,7 @@ public class Animal : Entity
         }
         _stateTimeLeft -= newTime;
 
-        if (Health < 0) shouldDie = true;
+        if (Health <= 0) shouldDie = true;
 
         //update sprite
         //todo
@@ -136,8 +166,15 @@ public class Animal : Entity
             Math.Min(_baseFrameSize.X, _baseFrameSize.X * scalar),
             Math.Min(_baseFrameSize.Y, _baseFrameSize.Y * scalar)
         );
-        
-        if (_beingHovered) BeginShaderMode(_outlineShader);
+
+        if (_beingHovered)
+        {
+            //draw sight radius
+            DrawCircleLinesV(_moveOrigin, 3, Color.Red);
+            DrawCircleLinesV(Position, Sight, Color.White);
+            DrawLineDashed(_moveOrigin, Position, 4, 4, Color.Red);
+            BeginShaderMode(_outlineShader);
+        }
             DrawTexturePro(Texture, 
                 new(Vector2.Zero, _baseFrameSize), 
                 new(Position, FrameSize), 
