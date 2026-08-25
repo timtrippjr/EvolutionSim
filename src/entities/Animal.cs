@@ -22,11 +22,20 @@ public struct BarItem
 enum AnimalState
 {
     Standing,
-    Walking,
+    Wandering,
+
     Eating,
     Drinking,
+    Sleeping,
     Reproducing,
-    Fleeing
+}
+
+//something the animal aims to walk toward in its wandering state
+enum AnimalDesire
+{
+    Food,
+    Drink,
+    Partner,
 }
 
 public class Animal : Entity
@@ -63,10 +72,8 @@ public class Animal : Entity
             Health -= remainder;
             return 0;
         }
-        if (value > max)
-        {
-            return max;
-        }
+        //commented out temporarily for testing
+        //if (value > max) return max;
 
         return value;
     }
@@ -188,7 +195,7 @@ public class Animal : Entity
             case AnimalState.Standing:
                 if (stateOver)
                 {
-                    _state = AnimalState.Walking;
+                    _state = AnimalState.Wandering;
                     _moveOrigin = Position;
                     Vector2 target = GetRandomPosition();
                     _moveDirection = (float)Math.Atan2(
@@ -197,7 +204,7 @@ public class Animal : Entity
                     );
                 }
                 break;
-            case AnimalState.Walking:
+            case AnimalState.Wandering:
                 //stateOver = have I reached goal?
                 //in my current direction, 
                 //is my distance from origin bigger than Sight from origin

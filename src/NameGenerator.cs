@@ -33,7 +33,7 @@ public class NameGenerator
         /////
 
 
-        ("sh", 7), ("ch", 7), 
+        ("sh", 7), ("ch", 7), ("ph", 7),
         
         ("dr", 6), ("qu", 6), ("pl", 6),
         ("sl", 6), ("br", 6), 
