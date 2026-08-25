@@ -6,13 +6,17 @@ public struct BarItem
     public float Part;
     public float Whole;
     public Color Color;
-    public BarItem(string name, float part, float whole, Color color)
+    public bool AscendingPriority;
+    public BarItem(string name, float part, float whole, Color color, bool p)
     {
         Name = name;
         Part = part;
         Whole = whole;
         Color = color;
+        AscendingPriority = p;
     }
+    public BarItem(string n, float p, float w, Color c)
+        : this(n, p, w, c, false){}
 }
 
 enum AnimalState
@@ -32,7 +36,7 @@ public class Animal : Entity
     private Vector2 _baseFrameSize = new(32, 32);
     private AnimalState _state = AnimalState.Standing;
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
-    private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(2);
+    private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(5);
 
     // existence stuff
     public string Name { get; set; }
@@ -40,34 +44,90 @@ public class Animal : Entity
     public int Speed { get; set; } // affects speed
     public int Sight { get; set; } // affects how far it can see around
 
-    //
-    public float MaxHealth { get; set; } = 100;
-    public float Health { get; set; }
-    public float MaxHunger { get; set; } = 100;
+    //bars
     private float _hunger;
-    public float Hunger { get => _hunger; set
+    private float _thirst;
+    private float _energy;
+    private float _reproduce;
+    public float MaxHealth { get; set; } = 100;
+    public float _maxHunger = 100;
+    public float _maxThirst = 100;
+    public float _maxEnergy = 100;
+    public float _maxReproduce = 100;
+
+    private float SetNeed(float value, float max)
+    {
+        if (value < 0)
         {
-            if (_hunger < 0)
-            {
-                float remainder = Math.Abs(Hunger);
-                Health -= remainder;
-                _hunger = 0;
-            }
-            else _hunger = value;
-        } 
+            float remainder = -value;
+            Health -= remainder;
+            return 0;
+        }
+        if (value > max)
+        {
+            return max;
+        }
+
+        return value;
     }
-    public float MaxThirst { get; set; } = 100;
-    public float Thirst { get; set; }
-    private readonly BarItem[] _bars = new BarItem[3];
+
+    public float Hunger
+    {
+        get => _hunger;
+        set => _hunger = SetNeed(value, _maxHunger);
+    }
+    public float Thirst
+    {
+        get => _thirst;
+        set => _thirst = SetNeed(value, _maxThirst);
+    }
+    public float Energy
+    {
+        get => _energy;
+        set => _energy = SetNeed(value, _maxEnergy);
+    }
+    public float Reproduce
+    {
+        get => _reproduce;
+        set => _reproduce = SetNeed(value, _maxReproduce);
+    }
+
+    public float Health { get; set; }
+    private readonly BarItem[] _bars = new BarItem[4];
     public BarItem[] BarValues
     {
         get
         {
-            _bars[0] = new("Health", Health, MaxHealth, Color.DarkGreen);
-            _bars[1] = new("Hunger", Hunger, MaxHunger, Color.DarkBrown);
-            _bars[2] = new("Thirst", Thirst, MaxThirst, Color.DarkBlue);
+            _bars[0] = new("Energy", Energy, _maxEnergy, Color.Orange);
+            _bars[1] = new("Hunger", Hunger, _maxHunger, Color.DarkBrown);
+            _bars[2] = new("Thirst", Thirst, _maxThirst, Color.SkyBlue);
+            _bars[3] = new(
+                "Reproduce drive", 
+                Reproduce, 
+                _maxReproduce, 
+                Color.Pink, 
+                true
+            );
             
-            Array.Sort(_bars, (a, b) => a.Part.CompareTo(b.Part));
+            //this is fine but barely works. find something better.
+            Array.Sort(_bars, (a, b) =>
+            {
+                bool aDrive = a.AscendingPriority;
+                bool bDrive = b.AscendingPriority;
+
+                if (aDrive || bDrive)
+                {
+                    BarItem drive = aDrive ? a : b;
+                    BarItem other = aDrive ? b : a;
+
+                    if (drive.Part > other.Part)
+                        return aDrive ? -1 : 1;
+
+                    return aDrive ? 1 : -1;
+                }
+
+                return a.Part.CompareTo(b.Part);
+            });
 
             return _bars;
         }
@@ -89,8 +149,10 @@ public class Animal : Entity
         Sight = sight;
         Age = age;
         Name = NameGenerator.GetRandomName(2, 10);
-        Hunger = MaxHunger;
-        Thirst = MaxThirst;
+        Hunger = _maxHunger;
+        Thirst = _maxThirst;
+        Energy = _maxEnergy;
+        Reproduce = 0;
         Health = MaxHealth;
     }
     public Animal(Vector2 pos) 
@@ -110,6 +172,15 @@ public class Animal : Entity
 
         TimeSpan newTime = TimeSpan.FromSeconds(DeltaTime());
         Age += newTime;
+
+        BarItem ta = BarValues[0];
+        if (_beingHovered)
+        {
+            Console.WriteLine(ta.Name);
+        }
+
+        Reproduce += 1 * DeltaTime();
+        Thirst -= 0.2f * DeltaTime();
 
         bool stateOver = _stateTimeLeft < TimeSpan.Zero;
         switch (_state)
@@ -141,7 +212,8 @@ public class Animal : Entity
                 //sight is the hypotenuse of the triangle
                 //theta is the random direction we pick
 
-                Hunger -= Speed * 0.001f;
+                Hunger -= Speed * DeltaTime() * 0.1f;
+                Energy -= Speed * DeltaTime() * 0.15f;
 
                 Position += direction * Speed * DeltaTime();
 

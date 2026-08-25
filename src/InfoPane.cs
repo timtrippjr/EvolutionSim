@@ -72,6 +72,7 @@ public class InfoPane
         //hunger bar
         foreach (BarItem bar in animal.BarValues)
             DrawProgressBar(bar.Color, bar.Part, bar.Whole, bar.Name);
+        DrawProgressBar(Color.Green, animal.Health, animal.MaxHealth, "health");
         //thirst bar
         // then, create reproduction bar, maybe intelligence bar?
     }
