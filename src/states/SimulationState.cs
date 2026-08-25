@@ -45,6 +45,10 @@ public class SimulationState : State
         //reset buttons
         if (IsKeyPressed(KeyboardKey.One))
             _zoomTarget = 1;
+        if (IsKeyPressed(KeyboardKey.Two))
+            _zoomTarget = 2;
+        if (IsKeyPressed(KeyboardKey.Three))
+            _zoomTarget = 3;
         
     }
 
