@@ -170,7 +170,7 @@ public class Animal : Entity
         );
     }
 
-    private void ActUponPriority(List<Entity>? entities)
+    private void ActUponPriority(List<Entity>? entities, World world)
     {
         if (Priority is 
             AnimalPriority.Hunger or 
@@ -198,7 +198,7 @@ public class Animal : Entity
                     }
             }
 
-            Vector2 target = GetRandomPosition();
+            Vector2 target = world.GetRandomPosition();
             if (_moveTarget != null) target = _moveTarget.Position;
 
             _moveDirection = (float)Math.Atan2(
@@ -216,14 +216,14 @@ public class Animal : Entity
         }
     }
 
-    private void UpdateStanding(List<Entity>? entities, TimeSpan delta)
+    private void UpdateStanding(List<Entity>? entities, World world, TimeSpan delta)
     {
         _stateTimeLeft -= delta;
         if (_stateTimeLeft >= TimeSpan.Zero) return; 
         
         Speak("Exit Standing: "+Priority.ToString());
         
-        ActUponPriority(entities);
+        ActUponPriority(entities, world);
     }
     private void UpdateWandering()
     {
@@ -296,7 +296,7 @@ public class Animal : Entity
         }
         _moveTarget = null;
     }
-    private void UpdateSleeping(List<Entity>? entities, TimeSpan delta)
+    private void UpdateSleeping(List<Entity>? entities, World world, TimeSpan delta)
     {
         _textureRotation += Speed * 20 * DeltaTime();
 
@@ -310,21 +310,21 @@ public class Animal : Entity
         Speak("Exit Sleeping: "+Priority.ToString());
 
         _textureRotation = 0;
-        ActUponPriority(entities);
+        ActUponPriority(entities, world);
     }
 
-    public override void Update(List<Entity>? entities, bool beingHovered)
+    public override void Update(List<Entity>? entities, World world, bool beingHovered)
     {
-        base.Update(entities, beingHovered);
+        base.Update(entities, world, beingHovered);
 
         TimeSpan newTime = TimeSpan.FromSeconds(DeltaTime());
         Age += newTime;
         
         switch (_state)
         {
-            case AnimalState.Standing: UpdateStanding(entities, newTime); break;
             case AnimalState.Wandering: UpdateWandering(); break;
-            case AnimalState.Sleeping: UpdateSleeping(entities, newTime); break;
+            case AnimalState.Standing: UpdateStanding(entities, world, newTime); break;
+            case AnimalState.Sleeping: UpdateSleeping(entities, world, newTime); break;
         }
 
         //Thirst -= 0.2f * DeltaTime();

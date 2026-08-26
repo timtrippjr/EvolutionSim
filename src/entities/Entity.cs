@@ -39,7 +39,7 @@ public class Entity
         );
     }
 
-    public virtual void Update(List<Entity>? entities, bool beingHovered)
+    public virtual void Update(List<Entity>? entities, World world, bool beingHovered)
     {
         _beingHovered = beingHovered;
     }

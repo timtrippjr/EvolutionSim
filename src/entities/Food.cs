@@ -65,9 +65,9 @@ public class Food : Entity
         : this(type, (int)pos.X, (int)pos.Y)
     {}
 
-    public override void Update(List<Entity>? entities, bool beingHovered)
+    public override void Update(List<Entity>? entities, World world, bool beingHovered)
     {
-        base.Update(entities, beingHovered);
+        base.Update(entities, world, beingHovered);
 
         Age += TimeSpan.FromSeconds(DeltaTime());
         _crowdCount = GetNearbyEntities(entities);

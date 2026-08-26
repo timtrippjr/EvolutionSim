@@ -13,15 +13,17 @@ public class SimulationState : State
     public Camera2D Camera => _camera;
     private float _zoomTarget;
 
+    private World _world = new(1280, 720);
+
     public override void Enter()
     {
         
         for (int i = 0; i < 2; i++)
-            _entities.Add(new Animal(GetRandomPosition()));
+            _entities.Add(new Animal(_world.GetRandomPosition()));
         for (int i = 0; i < 40; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
-                GetRandomPosition()
+                _world.GetRandomPosition()
             ));
 
         _camera.Target = Vector2.Zero;
@@ -33,7 +35,7 @@ public class SimulationState : State
 
     public void UpdateCamera()
     {
-		Vector2 mouseScreen = GetMousePosition() / WindowScale;
+		Vector2 mouseScreen = GetMousePosition();
 		Vector2 preZoomWorldPos = GetScreenToWorld2D(mouseScreen, _camera);
 
         _zoomTarget += GetMouseWheelMove() * 0.1f;
@@ -43,7 +45,7 @@ public class SimulationState : State
 
 		_camera.Target += preZoomWorldPos - postZoomWorldPos;
         if (IsMouseButtonDown(MouseButton.Right))
-            _camera.Target -= GetMouseDelta() / WindowScale / _camera.Zoom;
+            _camera.Target -= GetMouseDelta() / _camera.Zoom;
 
         //reset buttons
         if (IsKeyPressed(KeyboardKey.One))
@@ -62,11 +64,11 @@ public class SimulationState : State
 
         /*
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
-            _entities.Add(new Animal(GetRandomPosition()));
+            _entities.Add(new Animal(_world.GetRandomPosition()));
         if (IsKeyPressed(KeyboardKey.F)||IsKeyPressedRepeat(KeyboardKey.F))
             _entities.Add(new Food(
                 (FoodType)Rng.Next(2), 
-                GetRandomPosition()
+                _world.GetRandomPosition()
             ));
         */
         
@@ -74,7 +76,7 @@ public class SimulationState : State
             foreach (var e in _entities)
                 if (CheckCollisionPointRec(
                     GetScreenToWorld2D(
-                        GetMousePosition() / WindowScale, _camera
+                        GetMousePosition(), _camera
                     ),
                     new(e.Position - e.Origin, e.FrameSize)
                 ))
@@ -96,7 +98,7 @@ public class SimulationState : State
         _entitySnapshot.AddRange(_entities);
         foreach (var e in _entitySnapshot)
         {
-            e.Update(_entitySnapshot, _hover == e);
+            e.Update(_entitySnapshot, _world, _hover == e);
             
             if (e.Children is { Count: > 0 })
             {
@@ -111,23 +113,22 @@ public class SimulationState : State
             _newEntities.Clear();
         }
     }
-    public override void Draw()
+    public override void Draw(RenderTexture2D buff)
     {
+        ClearBackground(DarkerGray);
+
         BeginMode2D(_camera);
-            ClearBackground(DarkerGray);
-            DrawRectangle(0, 0, WindowWidth, WindowHeight, Color.DarkGray);
-            DrawRectangleLinesEx(
-                new(-1, -1, WindowWidth + 2, WindowHeight + 2), 
-                1, 
-                Color.Black
-            );
+            _world.Draw();
             _entities
                 .OrderBy(e => e.Position.Y)
                 .ToList()
                 .ForEach(e => e.Draw());
         EndMode2D();
 
-        _infoPane.Draw(_hover, _camera);
+        
+        DrawToTexture(buff, () =>
+            _infoPane.Draw(_hover, _camera)
+        );
         
     }
 }

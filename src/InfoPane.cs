@@ -98,7 +98,7 @@ public class InfoPane
             _rect.X + _rect.Width,
             _rect.Y + 50
         );
-        Vector2 lineEnd = (hover.Position - cam.Target) * cam.Zoom;
+        Vector2 lineEnd = (hover.Position - cam.Target) * cam.Zoom / WindowScale;
         if (_infoPaneOnRight)
         {
             _rect.X = WindowWidth - _rect.Width - _padding;

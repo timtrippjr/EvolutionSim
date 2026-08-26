@@ -37,13 +37,16 @@ public class Game
 
     public void Draw()
     {
-        BeginTextureMode(_buffer);
-            _state?.Draw();
-            DrawFont($"fps: {GetFPS()}", Color.White, 1, 0, 0);
-        EndTextureMode();
 
         BeginDrawing();
             ClearBackground(Color.Black);
+
+            DrawToTexture(_buffer, () => ClearBackground(Color.Blank));
+            _state?.Draw(_buffer);
+            DrawToTexture(_buffer, () =>
+                DrawFont($"fps: {GetFPS()}", Color.White, 1, 0, 0)
+            );
+
             DrawTexturePro(
                 _buffer.Texture,
                 new Rectangle(0, 0, 

@@ -10,7 +10,7 @@ public class State
     public virtual void Enter(){}
     public virtual void Exit(){}
     public virtual void Update(){}
-    public virtual void Draw(){}
+    public virtual void Draw(RenderTexture2D buff){}
 
     public void TransitionTo(State nextState)
     {

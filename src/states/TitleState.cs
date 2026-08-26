@@ -10,7 +10,7 @@ public class TitleState : State
         if (IsKeyPressed(KeyboardKey.Escape))
             Quit();
     }
-    public override void Draw()
+    public override void Draw(RenderTexture2D buff)
     {
         ClearBackground(Color.Black);
         DrawText("this works?!", 12, 12, 10, Color.DarkGray);

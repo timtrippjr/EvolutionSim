@@ -40,14 +40,6 @@ public static class Utility
         );
     }
     
-    public static Vector2 GetRandomPosition()
-    {
-        return new Vector2(
-            Rng.Next(WindowWidth),
-            Rng.Next(WindowHeight)
-        );
-    }
-    
     public static float GetSquaredDistBetween(Vector2 me, Vector2 other)
     {
         float dx = other.X - me.X;
@@ -81,5 +73,12 @@ public static class Utility
         Sound s = GetSound(path);
         SetSoundPitch(s, Rng.Next(50, 150) / 100.0f);
         PlaySound(s);
+    }
+
+    public static void DrawToTexture(RenderTexture2D tex, Action action)
+    {
+        BeginTextureMode(tex);
+            action();
+        EndTextureMode();
     }
 }
