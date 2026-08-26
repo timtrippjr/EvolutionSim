@@ -161,6 +161,7 @@ public class Animal : Entity
         Energy = _maxEnergy;
         Reproduce = 0;
         Health = MaxHealth;
+        _moveOrigin = Position;
     }
     public Animal(Vector2 pos) 
         : this(
@@ -248,19 +249,28 @@ public class Animal : Entity
             Math.Min(_baseFrameSize.Y, _baseFrameSize.Y * scalar)
         );
 
-        if (_beingHovered)
+
+        if (_beingHovered) 
         {
-            //draw sight radius
+            Vector2 rawTexel = new(1.0f / Texture.Width, 1.0f / Texture.Height);
+            Vector2 scale = FrameSize / _baseFrameSize;
+            SetShaderValue(_outlineShader, 
+                GetShaderLocation(_outlineShader, "texelSize"), 
+                rawTexel / scale, 
+                ShaderUniformDataType.Vec2
+            );
+            
             DrawCircleLinesV(_moveOrigin, 3, Color.Red);
             DrawCircleLinesV(Position, Sight, Color.White);
             DrawLineDashed(_moveOrigin, Position, 4, 4, Color.Red);
             BeginShaderMode(_outlineShader);
         }
-            DrawTexturePro(Texture, 
-                new(Vector2.Zero, _baseFrameSize), 
-                new(Position, FrameSize), 
-                Origin, 0, Color
-            );
-        if (_beingHovered) EndShaderMode();   
+
+        DrawTexturePro(Texture, 
+            new(Vector2.Zero, _baseFrameSize),
+            new(Position, FrameSize),
+            Origin, 0, Color
+        );
+        if (_beingHovered) EndShaderMode();
     }
 }

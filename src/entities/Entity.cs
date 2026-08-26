@@ -25,20 +25,16 @@ public class Entity
         
         //setup shader (why is this complicated)
         _outlineShader = GetShader("outline.fs");
-        int texelSizeLoc = GetShaderLocation(_outlineShader, "texelSize");
-        int outlineColorLoc = GetShaderLocation(_outlineShader, "outlineColor");
-        Vector2 texelSize = new(1.0f / Texture.Width, 1.0f / Texture.Height);
-        Vector4 colorData = new(1.0f, 1.0f, 1.0f, 1.0f); 
         SetShaderValue(
             _outlineShader, 
-            texelSizeLoc, 
-            texelSize, 
+            GetShaderLocation(_outlineShader, "texelSize"), 
+            new Vector2(1.0f / Texture.Width, 1.0f / Texture.Height), 
             ShaderUniformDataType.Vec2
         );
         SetShaderValue(
             _outlineShader, 
-            outlineColorLoc, 
-            colorData, 
+            GetShaderLocation(_outlineShader, "outlineColor"), 
+            new Vector4(1.0f, 1.0f, 1.0f, 1.0f), 
             ShaderUniformDataType.Vec4
         );
     }

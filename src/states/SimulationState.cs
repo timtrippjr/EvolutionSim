@@ -76,7 +76,7 @@ public class SimulationState : State
                     if (_hover == e) _hover = null;
                     else _hover = e;
                     break;
-                }
+                }else _hover = null;
 
         //_camera
         UpdateCamera();
