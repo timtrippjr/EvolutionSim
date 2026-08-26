@@ -12,8 +12,11 @@ public class TitleState : State
     }
     public override void Draw(RenderTexture2D buff)
     {
-        ClearBackground(Color.Black);
-        DrawText("this works?!", 12, 12, 10, Color.DarkGray);
-        DrawFont("Evolution Simulator!", Color.Gray, 3, 12, 30);
+        DrawToTexture(buff, () =>
+        {
+            ClearBackground(Color.Black);
+            DrawText("this works?!", 12, 12, 10, Color.DarkGray);
+            DrawFont("Evolution Simulator!", Color.Gray, 3, 12, 30);
+        });
     }
 }
