@@ -25,6 +25,15 @@ public class Food : Entity
     };
     public FoodType Type { get; set; }
     public FoodStage Stage { get; set; }
+    public int SustenanceAmount
+    {
+        get
+        {
+            if (Stage == FoodStage.Blossom) return 50;
+            if (Stage == FoodStage.Budding) return 30;
+            return 10;
+        }
+    }
     
     private int _overcrowdingAmount = 4;
     private static float _crowdRadius = 40;

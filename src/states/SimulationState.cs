@@ -3,6 +3,9 @@ namespace EvolutionSim;
 public class SimulationState : State
 {
     private List<Entity> _entities = [];
+    private readonly List<Entity> _entitySnapshot = [];
+    private readonly List<Entity> _newEntities = [];
+
     private Entity? _hover;
     private InfoPane _infoPane = new();
 
@@ -13,9 +16,9 @@ public class SimulationState : State
     public override void Enter()
     {
         
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 4; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 14; i++)
+        for (int i = 0; i < 12; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 GetRandomPosition()
@@ -89,16 +92,24 @@ public class SimulationState : State
             if (_hover is Animal a) a.Energy += 20;
         if (_hover?.shouldDie ?? false) _hover = null;
 
-        var snapshot = _entities.ToList();
-        snapshot.ForEach(e => e.Update(snapshot, _hover == e));
-
-        var newEntities = _entities
-            .Where(e => e.shouldDie)
-            .SelectMany(e => e.Children)
-            .ToList();
+        _entitySnapshot.Clear();
+        _entitySnapshot.AddRange(_entities);
+        foreach (var e in _entitySnapshot)
+        {
+            e.Update(_entitySnapshot, _hover == e);
+            
+            if (e.Children is { Count: > 0 })
+            {
+                _newEntities.AddRange(e.Children);
+                e.Children.Clear();
+            }
+        }
         _entities.RemoveAll(e => e.shouldDie);
-
-        _entities.AddRange(newEntities);
+        if (_newEntities.Count > 0)
+        {
+            _entities.AddRange(_newEntities);
+            _newEntities.Clear();
+        }
     }
     public override void Draw()
     {

@@ -35,12 +35,13 @@ public class Animal : Entity
 {
     private float _moveDirection;
     private Vector2 _moveOrigin;
+    private Entity? _moveTarget;
     private AnimalState _state = AnimalState.Standing;
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
     private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(5);
     private Vector2 _baseFrameSize = new(32, 32);
     private float _textureRotation = 0;
-    private float _interactRadius = 10; // radius for eating, drinking, mating.
+    private float _interactRadius = 7; // radius for eating, drinking, mating.
 
     // existence stuff
     public string Name { get; set; }
@@ -52,7 +53,7 @@ public class Animal : Entity
     private float _hunger;
     private float _thirst;
     private float _energy;
-    private float _matingDrive;
+    private float _mating;
     public float MaxHealth { get; set; } = 100;
     public float _maxHunger = 100;
     public float _maxThirst = 100;
@@ -67,7 +68,6 @@ public class Animal : Entity
             Health -= remainder;
             return 0;
         }
-        //commented out temporarily for testing
         //if (value > max) return max;
 
         return value;
@@ -90,8 +90,8 @@ public class Animal : Entity
     }
     public float Mating
     {
-        get => _matingDrive;
-        set => _matingDrive = SetNeed(value, _maxMating);
+        get => _mating;
+        set => _mating = SetNeed(value, _maxMating);
     }
 
     public float Health { get; set; }
@@ -178,22 +178,23 @@ public class Animal : Entity
 
             //if there is our priority IN SIGHT RADIUS, use its position
             //else, random.
-            Vector2 target = GetRandomPosition();
-
             foreach (Entity entity in entities ?? [])
             {
-                if (Priority is AnimalPriority.Hunger && entity is Food){
-                    // if food within sight, set its position to be target
-                }
-                if (Priority is AnimalPriority.Mating && entity is Animal){
-                    // if animal within sight, set its position to be target
-                }
-                /*
-                if (Priority is AnimalPriority.Thirst && entity is WaterBody){
-                    // if body of water within sight, set any of its cells positions to be target
-                }
-                */
+                if (entity == this) continue;
+
+                if (GetSquaredDistBetween(Position, entity.Position) <= Sight * Sight)
+                    if (
+                        (Priority is AnimalPriority.Hunger && entity is Food) ||
+                        (Priority is AnimalPriority.Mating && entity is Animal)
+                        //|| (Priority is AnimalPriority.Thirst && entity is WaterBody)
+                    ){
+                        _moveTarget = entity;
+                        break;
+                    }
             }
+
+            Vector2 target = GetRandomPosition();
+            if (_moveTarget != null) target = _moveTarget.Position;
 
             _moveDirection = (float)Math.Atan2(
                 target.Y - Position.Y, 
@@ -234,11 +235,66 @@ public class Animal : Entity
 
         Position += direction * Speed * DeltaTime();
 
-        if (GetSquaredDistBetween(Position, _moveOrigin) > Sight * Sight)
+        int sightRadius = Sight * Sight;
+        bool reachedGoal = GetSquaredDistBetween(Position, _moveOrigin) > sightRadius;
+        if (_moveTarget != null)
         {
-            _state = AnimalState.Standing;
-            _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(1, 20) / 10.0f);
+            float distanceSq = GetSquaredDistBetween(Position, _moveTarget.Position);
+            if (distanceSq > _interactRadius * _interactRadius) 
+            {
+                return;
+            }
         }
+        else
+        {
+            if (!reachedGoal) 
+            {
+                return; 
+            }
+        }
+        
+        //hasreached goal
+        _state = AnimalState.Standing;
+        _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(1, 20) / 10.0f);
+
+        if (_moveTarget == null) return;
+        
+        //we are targetting an object
+        if (Priority is AnimalPriority.Hunger && _moveTarget is Food f)
+        {
+            Hunger += f.SustenanceAmount;
+            f.shouldDie = true;
+            
+            Speak("I ATE THE FOOD FINALLYYYYY");
+        }
+        if (Priority is AnimalPriority.Mating && _moveTarget is Animal a)
+        {
+            Energy -= 40;
+
+            // they are satisfied
+            Mating = 0;
+            a.Mating = 0;
+
+            //create the child
+            //for now, just an average of both parents, with some mutation
+            //messy but its okay.
+            int driftAmt = Rng.Next(10, 40);
+            byte r = (byte)Math.Clamp(((Color.R + a.Color.R) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+            byte b = (byte)Math.Clamp(((Color.B + a.Color.B) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+            byte g = (byte)Math.Clamp(((Color.G + a.Color.G) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+            Color childColor = new Color(r, g, b);
+            Children.Add(new Animal(
+                (int)(Position.X + a.Position.X) / 2,
+                (int)(Position.Y + a.Position.Y) / 2,
+                childColor,
+                Math.Abs(((Speed + a.Speed) / 2) + Rng.Next(-driftAmt, driftAmt)),
+                Math.Abs(((Sight + a.Sight) / 2) + Rng.Next(-driftAmt, driftAmt)),
+                TimeSpan.Zero
+            ));
+            
+            Speak("I REPRODUCED FINALLLYYY");
+        }
+        _moveTarget = null;
     }
     private void UpdateSleeping(List<Entity>? entities, TimeSpan delta)
     {
@@ -270,7 +326,7 @@ public class Animal : Entity
             case AnimalState.Sleeping: UpdateSleeping(entities, newTime); break;
         }
 
-        Mating += 0.4f * DeltaTime();
+        Mating += 3.4f * DeltaTime();
         //Thirst -= 0.2f * DeltaTime();
 
         if (Health <= 0) shouldDie = true;
