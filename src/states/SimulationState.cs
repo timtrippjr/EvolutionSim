@@ -15,7 +15,7 @@ public class SimulationState : State
         
         for (int i = 0; i < 2; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 14; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 GetRandomPosition()
@@ -57,6 +57,7 @@ public class SimulationState : State
         if (IsKeyPressed(KeyboardKey.Escape))
             TransitionTo(new TitleState());
 
+        /*
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
             _entities.Add(new Animal(GetRandomPosition()));
         if (IsKeyPressed(KeyboardKey.F)||IsKeyPressedRepeat(KeyboardKey.F))
@@ -64,6 +65,8 @@ public class SimulationState : State
                 (FoodType)Rng.Next(2), 
                 GetRandomPosition()
             ));
+        */
+        
         if (IsMouseButtonPressed(MouseButton.Left))
             foreach (var e in _entities)
                 if (CheckCollisionPointRec(
@@ -103,7 +106,7 @@ public class SimulationState : State
             ClearBackground(DarkerGray);
             DrawRectangle(0, 0, WindowWidth, WindowHeight, Color.DarkGray);
             DrawRectangleLinesEx(
-                new(-1, -1, WindowWidth + 1, WindowHeight + 1), 
+                new(-1, -1, WindowWidth + 2, WindowHeight + 2), 
                 1, 
                 Color.Black
             );
