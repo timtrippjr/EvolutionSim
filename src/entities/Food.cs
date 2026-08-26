@@ -15,14 +15,14 @@ public enum FoodStage
 
 public class Food : Entity
 {
-    private TimeSpan _lifespan = TimeSpan.FromSeconds(Rng.Next(90, 110));
-
     private Dictionary<FoodStage, TimeSpan> _stageThresholds = new(){
         {FoodStage.Sprout, TimeSpan.Zero},
         {FoodStage.Seedling, TimeSpan.FromSeconds(Rng.Next(1, 10))},
         {FoodStage.Budding, TimeSpan.FromSeconds(Rng.Next(10, 15))},
-        {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(15, 30))},
+        {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(15, 20))},
     };
+    private TimeSpan _lifespan = TimeSpan.FromSeconds(Rng.Next(20, 30));
+
     public FoodType Type { get; set; }
     public FoodStage Stage { get; set; }
     public int SustenanceAmount
@@ -98,8 +98,8 @@ public class Food : Entity
                 );
                 
                 // in bounds
-                if (spawnPoint.X is >= 0 and <= WindowWidth && 
-                    spawnPoint.Y is >= 0 and <= WindowHeight)
+                if (spawnPoint.X >= 0 && spawnPoint.X <= world.Width && 
+                    spawnPoint.Y >= 0 && spawnPoint.Y <= world.Height)
                 {
                     Children.Add(new Food(Type, spawnPoint));
                 }
@@ -109,7 +109,10 @@ public class Food : Entity
     }
     public override void Draw()
     {
-        if (_beingHovered) BeginShaderMode(_outlineShader);
+        if (_beingHovered) {
+            DrawCircleLinesV(Position, _crowdRadius, Color.Red);
+            BeginShaderMode(_outlineShader);
+        }
         DrawTexturePro(
             Texture, 
             new(

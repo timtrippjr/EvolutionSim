@@ -18,7 +18,7 @@ public class SimulationState : State
     public override void Enter()
     {
         
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 8; i++)
             _entities.Add(new Animal(_world.GetRandomPosition()));
         for (int i = 0; i < 40; i++)
             _entities.Add(new Food(
@@ -28,8 +28,8 @@ public class SimulationState : State
 
         _camera.Target = Vector2.Zero;
         _camera.Offset = Vector2.Zero;
-        _camera.Zoom = 1.0f;
-        _zoomTarget = 1.0f;
+        _camera.Zoom = WindowScale;
+        _zoomTarget = WindowScale;
 
     }
 

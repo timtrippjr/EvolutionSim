@@ -37,7 +37,8 @@ public class Animal : Entity
     private Entity? _moveTarget;
     private AnimalState _state = AnimalState.Standing;
     private TimeSpan _stateTimeLeft = TimeSpan.FromSeconds(1);
-    private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(5);
+    private TimeSpan _lifeExpectancy = TimeSpan.FromMinutes(10);
+    private TimeSpan _mateExpectancy = TimeSpan.FromSeconds(30);
     private Vector2 _baseFrameSize = new(32, 32);
     private float _textureRotation = 0;
     private float _interactRadius = 7; // radius for eating, drinking, mating.
@@ -52,10 +53,10 @@ public class Animal : Entity
     private float _hunger;
     private float _thirst;
     private float _energy;
-    public float MaxHealth { get; set; } = 100;
-    public float _maxHunger = 100;
-    public float _maxThirst = 100;
-    public float _maxEnergy = 100;
+    public static float MaxHealth { get; set; } = 100;
+    public static float MaxHunger = 100;
+    public static float MaxThirst = 100;
+    public static float MaxEnergy = 100;
 
     public bool ReadyToMate {
         get
@@ -63,7 +64,7 @@ public class Animal : Entity
             return 
                 Hunger >= 75 && 
                 Energy >= 75 && 
-                Age >= TimeSpan.FromMinutes(1);
+                Age >= _mateExpectancy;
         } 
     }
 
@@ -84,17 +85,17 @@ public class Animal : Entity
     public float Hunger
     {
         get => _hunger;
-        set => _hunger = SetNeed(value, _maxHunger);
+        set => _hunger = SetNeed(value, MaxHunger);
     }
     public float Thirst
     {
         get => _thirst;
-        set => _thirst = SetNeed(value, _maxThirst);
+        set => _thirst = SetNeed(value, MaxThirst);
     }
     public float Energy
     {
         get => _energy;
-        set => _energy = SetNeed(value, _maxEnergy);
+        set => _energy = SetNeed(value, MaxEnergy);
     }
 
     private readonly BarItem[] _bars = new BarItem[2]; //set to 3 for water
@@ -102,8 +103,8 @@ public class Animal : Entity
     {
         get
         {
-            _bars[0] = new(AnimalPriority.Energy, Energy, _maxEnergy, Color.Orange);
-            _bars[1] = new(AnimalPriority.Hunger, Hunger, _maxHunger, Color.DarkBrown);
+            _bars[0] = new(AnimalPriority.Energy, Energy, MaxEnergy, Color.Orange);
+            _bars[1] = new(AnimalPriority.Hunger, Hunger, MaxHunger, Color.DarkBrown);
             //_bars[2] = new(AnimalPriority.Thirst, Thirst, _maxThirst, Color.SkyBlue);
 
             Array.Sort(_bars, (a, b) => a.Part.CompareTo(b.Part));
@@ -120,28 +121,33 @@ public class Animal : Entity
         } 
     }
 
-    public Animal(int x, int y, Color color, int speed, int sight, TimeSpan age) 
+    public Animal(
+        int x, int y, 
+        Color color, int speed, int sight, 
+        TimeSpan age,
+        float hunger, float thirst, float energy        
+    ) 
         : base(x, y, GetTexture("animal.png"))
     {
+        Name = NameGenerator.GetRandomName(3, 7);
         Color = color;
         Speed = speed;
         Sight = sight;
         Age = age;
-        Name = NameGenerator.GetRandomName(3, 7);
-        Hunger = _maxHunger;
-        Thirst = _maxThirst;
-        Energy = _maxEnergy;
+        Hunger = hunger;
+        Thirst = thirst;
+        Energy = energy;
         Health = MaxHealth;
         _moveOrigin = Position;
+
+        //Speak("i am new baby: h"+Hunger+" t"+Thirst+" e"+Energy);
     }
     public Animal(Vector2 pos) 
         : this(
-            (int)pos.X, 
-            (int)pos.Y, 
-            GetRandomColor(),
-            Rng.Next(30, 50),
-            Rng.Next(40, 100),
-            TimeSpan.Zero
+            (int)pos.X, (int)pos.Y, 
+            GetRandomColor(), Rng.Next(30, 50), Rng.Next(40, 100),
+            TimeSpan.Zero,
+            MaxHunger, MaxThirst, MaxEnergy
         ) 
     {}
 
@@ -166,7 +172,8 @@ public class Animal : Entity
             childColor,
             Math.Abs(((Speed + a.Speed) / 2) + Rng.Next(-driftAmt, driftAmt)),
             Math.Abs(((Sight + a.Sight) / 2) + Rng.Next(-driftAmt, driftAmt)),
-            TimeSpan.Zero
+            TimeSpan.Zero,
+            50, 50, 50
         );
     }
 
@@ -210,7 +217,7 @@ public class Animal : Entity
         // if in search of energy, SLEEP!!
         if (Priority is AnimalPriority.Energy)
         {
-            Speak("sleepy time");
+            //Speak("sleepy time");
             _state = AnimalState.Sleeping;
             _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(6, 20));
         }
@@ -221,7 +228,7 @@ public class Animal : Entity
         _stateTimeLeft -= delta;
         if (_stateTimeLeft >= TimeSpan.Zero) return; 
         
-        Speak("Exit Standing: "+Priority.ToString());
+        //Speak("Exit Standing: "+Priority.ToString());
         
         ActUponPriority(entities, world);
     }
@@ -281,7 +288,7 @@ public class Animal : Entity
             f.beingEaten = true;
 
             PlaySoundPitched("chomp-1.mp3");
-            Speak("I ATE THE FOOD FINALLYYYYY");
+            //Speak("I ATE THE FOOD FINALLYYYYY");
         }
         if (Priority is AnimalPriority.Mating && _moveTarget is Animal other)
         {
@@ -292,7 +299,7 @@ public class Animal : Entity
             Children.Add(GetBaby(other));
 
             PlaySoundPitched("dreaming-harp-8d.wav");
-            Speak("I REPRODUCED FINALLLYYY");
+            //Speak("I REPRODUCED FINALLLYYY");
         }
         _moveTarget = null;
     }
@@ -302,12 +309,12 @@ public class Animal : Entity
 
         Energy += 2 * DeltaTime();
         Hunger -= 0.5f * DeltaTime();
-        if (Energy >= _maxEnergy) _stateTimeLeft = TimeSpan.Zero;
+        if (Energy >= MaxEnergy) _stateTimeLeft = TimeSpan.Zero;
 
         _stateTimeLeft -= delta;
         if (_stateTimeLeft >= TimeSpan.Zero) return; 
         
-        Speak("Exit Sleeping: "+Priority.ToString());
+        //Speak("Exit Sleeping: "+Priority.ToString());
 
         _textureRotation = 0;
         ActUponPriority(entities, world);
