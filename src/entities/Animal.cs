@@ -68,7 +68,7 @@ public class Animal : Entity
             Health -= remainder;
             return 0;
         }
-        //if (value > max) return max;
+        if (value > max) return max;
 
         return value;
     }
@@ -225,18 +225,28 @@ public class Animal : Entity
         //stateOver = have I reached goal?
         //in my current direction, 
         //is my distance from origin bigger than Sight from origin
-        Vector2 direction = new(
-            (float)Math.Cos(_moveDirection),
-            (float)Math.Sin(_moveDirection)
-        );
+        Vector2 direction;
+        if (_moveTarget != null)
+        {
+            Vector2 toTarget = _moveTarget.Position - Position;
+            direction = Vector2.Normalize(toTarget);
+        }
+        else
+        {
+            direction = new Vector2(
+                (float)Math.Cos(_moveDirection),
+                (float)Math.Sin(_moveDirection)
+            );
+        }
         
         Hunger -= Speed * DeltaTime() * 0.1f;
         Energy -= Speed * DeltaTime() * 0.15f;
 
         Position += direction * Speed * DeltaTime();
 
-        int sightRadius = Sight * Sight;
-        bool reachedGoal = GetSquaredDistBetween(Position, _moveOrigin) > sightRadius;
+        int sightRadiusSq = Sight * Sight;
+        bool reachedGoal = GetSquaredDistBetween(Position, _moveOrigin) > sightRadiusSq;
+
         if (_moveTarget != null)
         {
             float distanceSq = GetSquaredDistBetween(Position, _moveTarget.Position);
@@ -301,6 +311,7 @@ public class Animal : Entity
         _textureRotation += Speed * 20 * DeltaTime();
 
         Energy += 2 * DeltaTime();
+        Hunger -= 1 * DeltaTime();
         if (Energy >= _maxEnergy) _stateTimeLeft = TimeSpan.Zero;
 
         _stateTimeLeft -= delta;
@@ -326,7 +337,7 @@ public class Animal : Entity
             case AnimalState.Sleeping: UpdateSleeping(entities, newTime); break;
         }
 
-        Mating += 3.4f * DeltaTime();
+        Mating += 2 * DeltaTime();
         //Thirst -= 0.2f * DeltaTime();
 
         if (Health <= 0) shouldDie = true;
