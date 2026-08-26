@@ -13,6 +13,7 @@ public class Game
             WindowHeight * WindowScale, 
             WindowTitle
         );
+        InitAudioDevice(); 
         SetTargetFPS(60);
         SetWindowIcon(GetImage(IconName));
         SetExitKey(KeyboardKey.Null);

@@ -8,6 +8,7 @@ public static class Resources
     private static Dictionary<string, Image> _images = [];
     private static Dictionary<string, Texture2D> _textures = [];
     private static Dictionary<string, Shader> _shaders = [];
+    private static Dictionary<string, Sound> _sounds = [];
 
     private static Font _font = 
         LoadFontEx($"{ResourcesFolder}fonts/{FontName}", FontHeight, null, 0);
@@ -74,6 +75,20 @@ public static class Resources
         }
 
         return shader;
+    }
+
+    public static Sound GetSound(string path)
+    {
+        Sound sound;
+
+        if (!_sounds.TryGetValue(path, out sound))
+        {
+            Console.WriteLine($"Sound \"{path}\" doesn't exist. Loading...");
+            sound = LoadSound(GetPath(SoundsFolder, path));
+            _sounds[path] = sound;
+        }
+
+        return sound;
     }
 
     public static void UnloadAllImages()

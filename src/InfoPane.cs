@@ -68,6 +68,15 @@ public class InfoPane
         DrawUIText($"speed: {animal.Speed}", Color.White);
         LineBreak();
 
+        if (animal.ReadyToMate)
+        {
+            DrawUIText("Ready To Mate", Color.Pink);
+        }
+        else
+        {
+            LineBreak();
+        }
+
         //these should be bars
         //hunger bar
         foreach (BarItem bar in animal.BarValues)

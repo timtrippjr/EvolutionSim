@@ -5,7 +5,6 @@ public struct BarItem
     public float Part;
     public float Whole;
     public Color Color;
-    public bool IsAscendingPriority;
     public AnimalPriority Priority;
     public BarItem(AnimalPriority priority, float part, float whole, Color color)
     {
@@ -53,12 +52,20 @@ public class Animal : Entity
     private float _hunger;
     private float _thirst;
     private float _energy;
-    private float _mating;
     public float MaxHealth { get; set; } = 100;
     public float _maxHunger = 100;
     public float _maxThirst = 100;
     public float _maxEnergy = 100;
-    public float _maxMating = 100;
+
+    public bool ReadyToMate {
+        get
+        {
+            return 
+                Hunger >= 75 && 
+                Energy >= 75 && 
+                Age >= TimeSpan.FromMinutes(1);
+        } 
+    }
 
     private float SetNeed(float value, float max)
     {
@@ -73,6 +80,7 @@ public class Animal : Entity
         return value;
     }
 
+    public float Health { get; set; }
     public float Hunger
     {
         get => _hunger;
@@ -88,50 +96,28 @@ public class Animal : Entity
         get => _energy;
         set => _energy = SetNeed(value, _maxEnergy);
     }
-    public float Mating
-    {
-        get => _mating;
-        set => _mating = SetNeed(value, _maxMating);
-    }
 
-    public float Health { get; set; }
-    private readonly BarItem[] _bars = new BarItem[3]; //set to 4 for water
+    private readonly BarItem[] _bars = new BarItem[2]; //set to 3 for water
     public BarItem[] BarValues
     {
         get
         {
             _bars[0] = new(AnimalPriority.Energy, Energy, _maxEnergy, Color.Orange);
             _bars[1] = new(AnimalPriority.Hunger, Hunger, _maxHunger, Color.DarkBrown);
-            _bars[2] = new(AnimalPriority.Mating, Mating, _maxMating, Color.Pink)
-            { IsAscendingPriority = true };
-            //_bars[3] = new(AnimalPriority.Thirst, Thirst, _maxThirst, Color.SkyBlue);
+            //_bars[2] = new(AnimalPriority.Thirst, Thirst, _maxThirst, Color.SkyBlue);
 
-            //this is fine but barely works. find something better.
-            Array.Sort(_bars, (a, b) =>
-            {
-                bool aDrive = a.IsAscendingPriority;
-                bool bDrive = b.IsAscendingPriority;
-
-                if (aDrive || bDrive)
-                {
-                    BarItem drive = aDrive ? a : b;
-                    BarItem other = aDrive ? b : a;
-
-                    if (drive.Part > other.Part)
-                        return aDrive ? -1 : 1;
-
-                    return aDrive ? 1 : -1;
-                }
-
-                return a.Part.CompareTo(b.Part);
-            });
+            Array.Sort(_bars, (a, b) => a.Part.CompareTo(b.Part));
 
             return _bars;
         }
     }
     public AnimalPriority Priority
     {
-        get => BarValues[0].Priority;   
+        get
+        {
+            if (ReadyToMate) return AnimalPriority.Mating;
+            return BarValues[0].Priority;
+        } 
     }
 
     public Animal(int x, int y, Color color, int speed, int sight, TimeSpan age) 
@@ -145,7 +131,6 @@ public class Animal : Entity
         Hunger = _maxHunger;
         Thirst = _maxThirst;
         Energy = _maxEnergy;
-        Mating = 0;
         Health = MaxHealth;
         _moveOrigin = Position;
     }
@@ -154,8 +139,8 @@ public class Animal : Entity
             (int)pos.X, 
             (int)pos.Y, 
             GetRandomColor(),
-            Rng.Next(10, 20),
-            Rng.Next(20, 60),
+            Rng.Next(30, 50),
+            Rng.Next(40, 100),
             TimeSpan.Zero
         ) 
     {}
@@ -163,6 +148,26 @@ public class Animal : Entity
     private void Speak(string word)
     {
         Console.WriteLine($"{Name}: {word}");
+    }
+
+    private Animal GetBaby(Animal a)
+    {
+        //create the child
+        //for now, just an average of both parents, with some mutation
+        //messy but its okay.
+        int driftAmt = Rng.Next(10, 40);
+        byte r = (byte)Math.Clamp(((Color.R + a.Color.R) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+        byte b = (byte)Math.Clamp(((Color.B + a.Color.B) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+        byte g = (byte)Math.Clamp(((Color.G + a.Color.G) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
+        Color childColor = new Color(r, g, b);
+        return new Animal(
+            (int)(Position.X + a.Position.X) / 2,
+            (int)(Position.Y + a.Position.Y) / 2,
+            childColor,
+            Math.Abs(((Speed + a.Speed) / 2) + Rng.Next(-driftAmt, driftAmt)),
+            Math.Abs(((Sight + a.Sight) / 2) + Rng.Next(-driftAmt, driftAmt)),
+            TimeSpan.Zero
+        );
     }
 
     private void ActUponPriority(List<Entity>? entities)
@@ -273,35 +278,20 @@ public class Animal : Entity
         if (Priority is AnimalPriority.Hunger && _moveTarget is Food f)
         {
             Hunger += f.SustenanceAmount;
-            f.shouldDie = true;
-            
+            f.beingEaten = true;
+
+            PlaySoundPitched("chomp-1.mp3");
             Speak("I ATE THE FOOD FINALLYYYYY");
         }
-        if (Priority is AnimalPriority.Mating && _moveTarget is Animal a)
+        if (Priority is AnimalPriority.Mating && _moveTarget is Animal other)
         {
+            if (!other.ReadyToMate) return;
+
             Energy -= 40;
+            Hunger -= 30;
+            Children.Add(GetBaby(other));
 
-            // they are satisfied
-            Mating = 0;
-            a.Mating = 0;
-
-            //create the child
-            //for now, just an average of both parents, with some mutation
-            //messy but its okay.
-            int driftAmt = Rng.Next(10, 40);
-            byte r = (byte)Math.Clamp(((Color.R + a.Color.R) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
-            byte b = (byte)Math.Clamp(((Color.B + a.Color.B) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
-            byte g = (byte)Math.Clamp(((Color.G + a.Color.G) / 2) + Rng.Next(-driftAmt, driftAmt), 0, 255);
-            Color childColor = new Color(r, g, b);
-            Children.Add(new Animal(
-                (int)(Position.X + a.Position.X) / 2,
-                (int)(Position.Y + a.Position.Y) / 2,
-                childColor,
-                Math.Abs(((Speed + a.Speed) / 2) + Rng.Next(-driftAmt, driftAmt)),
-                Math.Abs(((Sight + a.Sight) / 2) + Rng.Next(-driftAmt, driftAmt)),
-                TimeSpan.Zero
-            ));
-            
+            PlaySoundPitched("dreaming-harp-8d.wav");
             Speak("I REPRODUCED FINALLLYYY");
         }
         _moveTarget = null;
@@ -311,7 +301,7 @@ public class Animal : Entity
         _textureRotation += Speed * 20 * DeltaTime();
 
         Energy += 2 * DeltaTime();
-        Hunger -= 1 * DeltaTime();
+        Hunger -= 0.5f * DeltaTime();
         if (Energy >= _maxEnergy) _stateTimeLeft = TimeSpan.Zero;
 
         _stateTimeLeft -= delta;
@@ -337,7 +327,6 @@ public class Animal : Entity
             case AnimalState.Sleeping: UpdateSleeping(entities, newTime); break;
         }
 
-        Mating += 2 * DeltaTime();
         //Thirst -= 0.2f * DeltaTime();
 
         if (Health <= 0) shouldDie = true;

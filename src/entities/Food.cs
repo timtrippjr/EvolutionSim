@@ -19,9 +19,9 @@ public class Food : Entity
 
     private Dictionary<FoodStage, TimeSpan> _stageThresholds = new(){
         {FoodStage.Sprout, TimeSpan.Zero},
-        {FoodStage.Seedling, TimeSpan.FromSeconds(Rng.Next(1, 30))},
-        {FoodStage.Budding, TimeSpan.FromSeconds(Rng.Next(30, 35))},
-        {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(35, 45))},
+        {FoodStage.Seedling, TimeSpan.FromSeconds(Rng.Next(1, 10))},
+        {FoodStage.Budding, TimeSpan.FromSeconds(Rng.Next(10, 15))},
+        {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(15, 30))},
     };
     public FoodType Type { get; set; }
     public FoodStage Stage { get; set; }
@@ -51,6 +51,8 @@ public class Food : Entity
             .ToList()
             .Count ?? 0;
     }
+
+    public bool beingEaten = false;
 
     public Food(FoodType type, int x, int y) 
         : base(x, y, GetTexture("food.png"))
@@ -82,9 +84,11 @@ public class Food : Entity
             shouldDie = true;
         if (_crowdCount > _overcrowdingAmount)
             shouldDie = true;
+        if (beingEaten)
+            shouldDie = true;
 
         // reproduce
-        if (shouldDie && _crowdCount < 3)
+        if (!beingEaten && shouldDie && _crowdCount < 3)
             for (int i = 0; i < 2; i++)
             {
                 int range = _reproductionRadius;

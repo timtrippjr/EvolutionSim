@@ -16,9 +16,9 @@ public class SimulationState : State
     public override void Enter()
     {
         
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 2; i++)
             _entities.Add(new Animal(GetRandomPosition()));
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 40; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 GetRandomPosition()

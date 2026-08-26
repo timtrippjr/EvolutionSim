@@ -75,4 +75,11 @@ public static class Utility
             1.0f - MathF.Exp(-lambda * DeltaTime())
         );
     }
+
+    public static void PlaySoundPitched(string path)
+    {
+        Sound s = GetSound(path);
+        SetSoundPitch(s, Rng.Next(50, 150) / 100.0f);
+        PlaySound(s);
+    }
 }
