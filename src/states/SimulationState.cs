@@ -17,6 +17,7 @@ public class SimulationState : State
 
     public override void Enter()
     {
+        base.Enter();
         
         for (int i = 0; i < 8; i++)
             _entities.Add(new Animal(_world.GetRandomPosition()));
@@ -31,6 +32,12 @@ public class SimulationState : State
         _camera.Zoom = WindowScale;
         _zoomTarget = WindowScale;
 
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        _world.Unload();
     }
 
     public void UpdateCamera()
