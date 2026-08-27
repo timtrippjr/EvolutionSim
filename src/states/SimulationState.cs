@@ -42,6 +42,8 @@ public class SimulationState : State
         _camera.Zoom = WindowScale;
         _zoomTarget = WindowScale;
 
+        TimeMultiple = 1;
+
     }
 
     public override void Exit()
@@ -103,18 +105,13 @@ public class SimulationState : State
             ));
 
         if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
-            TimeMultiple += TimeMultiple < 1?0.25f:1;
+        {
+            TimeMultiple +=TimeMultiple < 1?0.25f:1;
+            if (TimeMultiple > 10) TimeMultiple = 10;
+        }
         if (IsKeyPressed(KeyboardKey.Left) || IsKeyPressedRepeat(KeyboardKey.Left))
         {
-            if (TimeMultiple <= 1)
-            {
-                TimeMultiple -= 0.25f;
-            }
-            else
-            {
-                TimeMultiple -= 1;
-            }
-
+            TimeMultiple -=TimeMultiple <= 1?0.25f:1;
             if (TimeMultiple < 0) TimeMultiple = 0;
         }
         
