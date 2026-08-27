@@ -21,9 +21,9 @@ public class SimulationState : State
     {
         base.Enter();
         
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 18; i++)
             _entities.Add(new Animal(_world.GetRandomLandPosition()));
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 80; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 _world.GetRandomGrassPosition()
@@ -82,10 +82,21 @@ public class SimulationState : State
                 _world.GetRandomGrassPosition()
             ));
 
-        if (IsKeyPressed(KeyboardKey.Right)||IsKeyPressedRepeat(KeyboardKey.Right))
-            TimeMultiple += 1;
-        if (IsKeyPressed(KeyboardKey.Left)||IsKeyPressedRepeat(KeyboardKey.Left))
-            TimeMultiple -= 0.25f;
+        if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
+            TimeMultiple += TimeMultiple < 1?0.25f:1;
+        if (IsKeyPressed(KeyboardKey.Left) || IsKeyPressedRepeat(KeyboardKey.Left))
+        {
+            if (TimeMultiple <= 1)
+            {
+                TimeMultiple -= 0.25f;
+            }
+            else
+            {
+                TimeMultiple -= 1;
+            }
+
+            if (TimeMultiple < 0) TimeMultiple = 0;
+        }
         
         
         
