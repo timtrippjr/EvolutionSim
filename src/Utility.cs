@@ -68,11 +68,16 @@ public static class Utility
         );
     }
 
-    public static void PlaySoundPitched(string path)
+    public static void PlaySoundPitched(string path, float volume)
     {
         Sound s = GetSound(path);
-        SetSoundPitch(s, Rng.Next(50, 150) / 100.0f);
+        SetSoundPitch(s, Rng.Next(80, 150) / 100.0f);
+        SetSoundVolume(s, volume);
         PlaySound(s);
+    }
+    public static void PlaySoundPitched(string path)
+    {
+        PlaySoundPitched(path, 1);
     }
 
     public static void DrawToTexture(RenderTexture2D tex, Action action)

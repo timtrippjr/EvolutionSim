@@ -54,9 +54,9 @@ public class Animal : Entity
     private float _thirst;
     private float _energy;
     public static float MaxHealth { get; set; } = 100;
-    public static float MaxHunger = 100;
-    public static float MaxThirst = 100;
-    public static float MaxEnergy = 100;
+    public static readonly float MaxHunger = 100;
+    public static readonly float MaxThirst = 100;
+    public static readonly float MaxEnergy = 100;
 
     public bool ReadyToMate {
         get
@@ -73,7 +73,7 @@ public class Animal : Entity
         if (value < 0)
         {
             float remainder = -value;
-            Health -= remainder;
+            Health -= remainder * 4;
             return 0;
         }
         if (value > max) return max;
@@ -220,6 +220,7 @@ public class Animal : Entity
             //Speak("sleepy time");
             _state = AnimalState.Sleeping;
             _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(6, 20));
+            //PlaySoundPitched("sleeping_HwTkaox.wav", 0.3f);
         }
     }
 
@@ -305,7 +306,7 @@ public class Animal : Entity
     }
     private void UpdateSleeping(List<Entity>? entities, World world, TimeSpan delta)
     {
-        _textureRotation += Speed * 20 * DeltaTime();
+        _textureRotation = 90;//Speed * 20 * DeltaTime();
 
         Energy += 2 * DeltaTime();
         Hunger -= 0.5f * DeltaTime();
@@ -338,6 +339,8 @@ public class Animal : Entity
 
         if (Health <= 0) shouldDie = true;
         if (Age > _lifeExpectancy) shouldDie = true;
+        if (shouldDie)
+            PlaySoundPitched("ouch_AKigkiF.mp3");
 
         //update sprite
         //todo

@@ -96,9 +96,7 @@ public class SimulationState : State
         //_camera
         UpdateCamera();
         //
-
-        if (IsKeyPressed(KeyboardKey.H))
-            if (_hover is Animal a) a.Energy += 20;
+        
         if (_hover?.shouldDie ?? false) _hover = null;
 
         _entitySnapshot.Clear();
