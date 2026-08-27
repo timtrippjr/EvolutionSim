@@ -18,7 +18,12 @@ public class SimulationState : State
     public Camera2D Camera => _camera;
     private float _zoomTarget;
 
-    private World _world = new(1280, 720);
+    private World _world;
+
+    public SimulationState(int worldWidth, int worldHeight)
+    {
+        _world = new(worldWidth, worldHeight);
+    }
 
     public override void Enter()
     {
