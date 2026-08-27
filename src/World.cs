@@ -3,35 +3,19 @@ namespace EvolutionSim;
 public class World
 {
     private Shader _shader;
-    // uniform locations
-    private int _waterLevelLocation;
         
-    private static readonly float _waterLevelMax = 255;
-    private static readonly float _sandLevel = 128;
-    private float _waterLevel;
+    private static readonly int _heightMax = 255;
+    private int _waterLevel;
+    private int _sandLevel;
+
+    private List<Vector2> _grassPositions = [];
+    private List<Vector2> _landPositions = [];
 
     public int Width { get; set; }
     public int Height { get; set; }
 
     public float[,] NoiseMap { get; set; }
     public Texture2D NoiseTexture { get; set; }
-
-    public float WaterLevel
-    {
-        get => _waterLevel;
-        set
-        {
-            _waterLevel = value;
-            if (_waterLevel > _waterLevelMax) _waterLevel = _waterLevelMax;
-            if (_waterLevel < 0) _waterLevel = 0; 
-            SetShaderValue(
-                _shader, 
-                _waterLevelLocation, 
-                _waterLevel / _waterLevelMax, 
-                ShaderUniformDataType.Float
-            );
-        }
-    }
 
     private float[,] GetNewNoiseMap()
     {
@@ -43,14 +27,25 @@ public class World
         
         float[,] map = new float[Width, Height];
         float frequency = 0.3f; 
-        Parallel.For(0, Width, x =>
+        for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
             {
-                float rawNoise = noise.GetNoise(x * frequency, y * frequency);
-                map[x, y] = (rawNoise + 1.0f) / 2.0f;
+                float z = (noise.GetNoise(x * frequency, y * frequency) + 1.0f) / 2.0f;
+                map[x, y] = z;
+
+                Vector2 pos = new(x, y);
+                if (z * _heightMax > _waterLevel)
+                {
+                    _landPositions.Add(pos);
+
+                    if (z * _heightMax > _sandLevel)
+                    {
+                        _grassPositions.Add(pos);
+                    }
+                }
             }
-        });
+        }
         return map;
     }
     private Texture2D GenerateNoiseTexture()
@@ -77,49 +72,58 @@ public class World
         //setup shader (why is this complicated X2)
         _shader = GetShader("world.fs");
 
-        _waterLevelLocation = GetShaderLocation(_shader, "waterLevel");
-        SetShaderValue(
-            _shader, 
-            GetShaderLocation(_shader, "sandLevel"), 
-            _sandLevel / _waterLevelMax, 
-            ShaderUniformDataType.Float
-        );
+        (string Location, int Level)[] heightVars =
+        {
+            ("waterLevel", _waterLevel),
+            ("sandLevel", _sandLevel),
+        };
+        foreach (var (Location, Level) in heightVars)
+            SetShaderValue(
+                _shader, 
+                GetShaderLocation(_shader, Location), 
+                (float)Level / _heightMax, 
+                ShaderUniformDataType.Float
+            );
         
         //setup world colors
         (string Location, Color Color)[] colorVars =
         {
             ("grassLight", new(0, 255, 0)),
             ("grassDark", new(0, 120, 0)),
-            ("waterLight", new(170, 170, 200)),
-            ("waterDark", new(30, 30, 200)),
+            ("waterLight", new(120, 120, 200)),
+            ("waterDark", new(0, 0, 200)),
             ("sandLight", new(255, 234, 163)),
             ("sandDark", new(205, 184, 113)),
         };
-        foreach (var var in colorVars)
-        {
+        foreach (var (Location, Color) in colorVars)
             SetShaderValue(
                 _shader, 
-                GetShaderLocation(_shader, var.Location), 
+                GetShaderLocation(_shader, Location), 
                 new Vector4(
-                    var.Color.R / 255.0f, 
-                    var.Color.G / 255.0f, 
-                    var.Color.B / 255.0f, 
+                    Color.R / 255.0f, 
+                    Color.G / 255.0f, 
+                    Color.B / 255.0f, 
                     1.0f
                 ), 
                 ShaderUniformDataType.Vec4
             );
-        }
     }
 
     public World(int w, int h)
     {
         Width = w;
         Height = h;
-        SetupShaderUniforms();
+
+        //must be set before noisemap is generated
+        _waterLevel = Rng.Next(50, 200);
+        _sandLevel = _waterLevel + 16;
+
         NoiseMap = GetNewNoiseMap();
         NoiseTexture = GenerateNoiseTexture();
-        
-        WaterLevel = _sandLevel - 16;
+
+        SetupShaderUniforms();
+
+        Console.WriteLine(_waterLevel);
     }
     
     public void Unload()
@@ -134,14 +138,43 @@ public class World
             Rng.Next(Height)
         );
     }
-
-    public void Update()
+    
+    public Vector2 GetRandomGrassPosition()
     {
-        if (IsKeyDown(KeyboardKey.Up))
-            WaterLevel += 30 * DeltaTime();
-        if (IsKeyDown(KeyboardKey.Down))
-            WaterLevel -= 30 * DeltaTime();
-        
+        if (_grassPositions.Count == 0) return Vector2.Zero;
+        return _grassPositions[Rng.Next(_grassPositions.Count)];
+    }
+    
+    public Vector2 GetRandomLandPosition()
+    {
+        if (_landPositions.Count == 0) return Vector2.Zero;
+        return _landPositions[Rng.Next(_landPositions.Count)];
+    }
+
+    public bool IsPositionUnderwater(Vector2 position)
+    {
+        if (IsPositionOutOfBounds(position)) return false;
+        int x = (int)position.X;
+        int y = (int)position.Y;
+        return NoiseMap[x, y] * _heightMax < _waterLevel;
+    }
+
+    public bool IsPositionGrass(Vector2 position)
+    {
+        if (IsPositionOutOfBounds(position)) return false;
+        int x = (int)position.X;
+        int y = (int)position.Y;
+        return NoiseMap[x, y] * _heightMax > _sandLevel;
+    }
+    
+    public bool IsPositionOutOfBounds(Vector2 position)
+    {
+        int x = (int)position.X;
+        int y = (int)position.Y;
+
+        if (x < 0 || x >= Width || y < 0 || y >= Height)
+            return true;
+        return false;
     }
 
     public void Draw()

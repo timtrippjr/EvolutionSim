@@ -6,6 +6,8 @@ public class SimulationState : State
     private readonly List<Entity> _entitySnapshot = [];
     private readonly List<Entity> _newEntities = [];
 
+    private Texture2D _ffTex = GetTexture("ff.png");
+
     private Entity? _hover;
     private InfoPane _infoPane = new();
 
@@ -20,11 +22,11 @@ public class SimulationState : State
         base.Enter();
         
         for (int i = 0; i < 8; i++)
-            _entities.Add(new Animal(_world.GetRandomPosition()));
+            _entities.Add(new Animal(_world.GetRandomLandPosition()));
         for (int i = 0; i < 40; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
-                _world.GetRandomPosition()
+                _world.GetRandomGrassPosition()
             ));
 
         _camera.Target = Vector2.Zero;
@@ -61,6 +63,8 @@ public class SimulationState : State
             _zoomTarget = 2;
         if (IsKeyPressed(KeyboardKey.Three))
             _zoomTarget = 3;
+        if (IsKeyPressed(KeyboardKey.R))
+            _camera.Target = Vector2.Zero;
         
     }
 
@@ -69,15 +73,21 @@ public class SimulationState : State
         if (IsKeyPressed(KeyboardKey.Escape))
             TransitionTo(new TitleState());
 
-        /*
+        
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
-            _entities.Add(new Animal(_world.GetRandomPosition()));
+            _entities.Add(new Animal(_world.GetRandomLandPosition()));
         if (IsKeyPressed(KeyboardKey.F)||IsKeyPressedRepeat(KeyboardKey.F))
             _entities.Add(new Food(
                 (FoodType)Rng.Next(2), 
-                _world.GetRandomPosition()
+                _world.GetRandomGrassPosition()
             ));
-        */
+
+        if (IsKeyPressed(KeyboardKey.Right)||IsKeyPressedRepeat(KeyboardKey.Right))
+            TimeMultiple += 1;
+        if (IsKeyPressed(KeyboardKey.Left)||IsKeyPressedRepeat(KeyboardKey.Left))
+            TimeMultiple -= 0.25f;
+        
+        
         
         if (IsMouseButtonPressed(MouseButton.Left))
             foreach (var e in _entities)
@@ -95,7 +105,6 @@ public class SimulationState : State
 
         //_camera
         UpdateCamera();
-        _world.Update();
         //
         
         if (_hover?.shouldDie ?? false) _hover = null;
@@ -133,7 +142,14 @@ public class SimulationState : State
 
         
         DrawToTexture(buff, () =>
-            _infoPane.Draw(_hover, _camera)
+        {
+            _infoPane.Draw(_hover, _camera);
+            if (TimeMultiple != 1)
+            {
+                DrawTextureEx(_ffTex, new(50,0), 0, 0.15f, Color.White);
+                DrawFont("FF: x"+TimeMultiple, Color.White, 1, 70,0);
+            }
+        }
         );
         
     }

@@ -92,20 +92,31 @@ public class Food : Entity
             for (int i = 0; i < 2; i++)
             {
                 int range = _reproductionRadius;
-                Vector2 spawnPoint = Position + new Vector2(
-                    Rng.Next(-range, range + 1), 
-                    Rng.Next(-range, range + 1)
-                );
+                Vector2 spawnPoint;
                 
-                // in bounds
-                if (spawnPoint.X >= 0 && spawnPoint.X <= world.Width && 
-                    spawnPoint.Y >= 0 && spawnPoint.Y <= world.Height)
+                bool validSpotFound = false;
+                int maxAttempts = 20; 
+                int attempts = 0;
+                do
                 {
-                    Children.Add(new Food(Type, spawnPoint));
-                }
-            }
-        
+                    spawnPoint = Position + new Vector2(
+                        Rng.Next(-range, range + 1),
+                        Rng.Next(-range, range + 1)
+                    );
 
+                    if (
+                        !world.IsPositionOutOfBounds(spawnPoint) 
+                        && world.IsPositionGrass(spawnPoint)
+                    )
+                    {
+                        validSpotFound = true;
+                        break;
+                    }
+                } while (attempts < maxAttempts);
+
+                if (validSpotFound)
+                    Children.Add(new Food(Type, spawnPoint));
+            }
     }
     public override void Draw()
     {

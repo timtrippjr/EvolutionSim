@@ -205,7 +205,7 @@ public class Animal : Entity
                     }
             }
 
-            Vector2 target = world.GetRandomPosition();
+            Vector2 target = world.GetRandomGrassPosition();
             if (_moveTarget != null) target = _moveTarget.Position;
 
             _moveDirection = (float)Math.Atan2(
@@ -233,7 +233,7 @@ public class Animal : Entity
         
         ActUponPriority(entities, world);
     }
-    private void UpdateWandering()
+    private void UpdateWandering(World world)
     {
         //stateOver = have I reached goal?
         //in my current direction, 
@@ -246,34 +246,43 @@ public class Animal : Entity
         }
         else
         {
+            float dir = _moveDirection;
+            if (world.IsPositionOutOfBounds(Position))
+                dir += (float)Math.PI;
+            
             direction = new Vector2(
-                (float)Math.Cos(_moveDirection),
-                (float)Math.Sin(_moveDirection)
+                (float)Math.Cos(dir),
+                (float)Math.Sin(dir)
             );
         }
         
-        Hunger -= Speed * DeltaTime() * 0.1f;
+        Hunger -= Speed * DeltaTime() * 0.075f;
         Energy -= Speed * DeltaTime() * 0.15f;
+        
+        Vector2 movementStep = direction * Speed * DeltaTime();
+        Vector2 nextPosition = Position + movementStep;
 
-        Position += direction * Speed * DeltaTime();
+        if (world.IsPositionUnderwater(nextPosition))
+        {
+            _moveDirection += (float)Math.PI;
+            _state = AnimalState.Standing;
+            _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(1, 20) / 10.0f);
+            _moveTarget = null; // Clear target if it was across a lake
+            return; 
+        }
 
-        int sightRadiusSq = Sight * Sight;
-        bool reachedGoal = GetSquaredDistBetween(Position, _moveOrigin) > sightRadiusSq;
+        Position = nextPosition;
 
         if (_moveTarget != null)
         {
             float distanceSq = GetSquaredDistBetween(Position, _moveTarget.Position);
             if (distanceSq > _interactRadius * _interactRadius) 
-            {
                 return;
-            }
         }
         else
         {
-            if (!reachedGoal) 
-            {
-                return; 
-            }
+            bool reachedGoal = GetSquaredDistBetween(Position, _moveOrigin) > Sight * Sight;
+            if (!reachedGoal) return; 
         }
         
         //hasreached goal
@@ -330,11 +339,12 @@ public class Animal : Entity
         
         switch (_state)
         {
-            case AnimalState.Wandering: UpdateWandering(); break;
+            case AnimalState.Wandering: UpdateWandering(world); break;
             case AnimalState.Standing: UpdateStanding(entities, world, newTime); break;
             case AnimalState.Sleeping: UpdateSleeping(entities, world, newTime); break;
         }
 
+        Hunger -= 0.2f * DeltaTime();
         //Thirst -= 0.2f * DeltaTime();
 
         if (Health <= 0) shouldDie = true;
