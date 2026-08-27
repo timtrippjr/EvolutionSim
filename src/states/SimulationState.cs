@@ -95,6 +95,7 @@ public class SimulationState : State
 
         //_camera
         UpdateCamera();
+        _world.Update();
         //
         
         if (_hover?.shouldDie ?? false) _hover = null;
