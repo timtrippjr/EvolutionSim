@@ -6,6 +6,9 @@ public class SimulationState : State
     private readonly List<Entity> _entitySnapshot = [];
     private readonly List<Entity> _newEntities = [];
 
+    private TimeSpan _spawnFoodWaitTime = TimeSpan.FromSeconds(30);
+    private TimeSpan _spawnFoodTime;
+
     private Texture2D _ffTex = GetTexture("ff.png");
 
     private Entity? _hover;
@@ -73,6 +76,18 @@ public class SimulationState : State
         if (IsKeyPressed(KeyboardKey.Escape))
             TransitionTo(new TitleState());
 
+        _spawnFoodTime -= TimeSpan.FromSeconds(DeltaTime());
+        if (_spawnFoodTime < TimeSpan.Zero)
+        {
+            _spawnFoodTime = _spawnFoodWaitTime;
+            Console.WriteLine("Spawned more food");
+            
+            for (int i = 0; i < 8; i++)
+                _entities.Add(new Food(
+                    (FoodType)Rng.Next(2), 
+                    _world.GetRandomGrassPosition()
+                ));
+        }
         
         if (IsKeyPressed(KeyboardKey.A)||IsKeyPressedRepeat(KeyboardKey.A))
             _entities.Add(new Animal(_world.GetRandomLandPosition()));
