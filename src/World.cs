@@ -13,6 +13,7 @@ public class World
 
     public int Width { get; set; }
     public int Height { get; set; }
+    public int WaterLevel { get => _waterLevel; }
 
     public float[,] NoiseMap { get; set; }
     public Texture2D NoiseTexture { get; set; }
@@ -115,8 +116,8 @@ public class World
         Height = h;
 
         //must be set before noisemap is generated
-        _waterLevel = Rng.Next(50, 200);
-        _sandLevel = _waterLevel + 16;
+        _waterLevel = Rng.Next(50, 120);
+        _sandLevel = _waterLevel + Rng.Next(12, 20);
 
         NoiseMap = GetNewNoiseMap();
         NoiseTexture = GenerateNoiseTexture();

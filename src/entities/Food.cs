@@ -22,6 +22,7 @@ public class Food : Entity
         {FoodStage.Blossom, TimeSpan.FromSeconds(Rng.Next(15, 20))},
     };
     private TimeSpan _lifespan = TimeSpan.FromSeconds(Rng.Next(20, 30));
+    private float _growthRate = 1.0f;
 
     public FoodType Type { get; set; }
     public FoodStage Stage { get; set; }
@@ -54,22 +55,23 @@ public class Food : Entity
 
     public bool beingEaten = false;
 
-    public Food(FoodType type, int x, int y) 
+    public Food(FoodType type, int x, int y, float growthRate) 
         : base(x, y, GetTexture("food.png"))
     {
         FrameSize = new(16, 16);
         Type = type;
         Stage = FoodStage.Sprout;
+        _growthRate = growthRate;
     }
     public Food(FoodType type, Vector2 pos) 
-        : this(type, (int)pos.X, (int)pos.Y)
+        : this(type, (int)pos.X, (int)pos.Y, Rng.Next(5, 20) / 10)
     {}
 
     public override void Update(List<Entity>? entities, World world, bool beingHovered)
     {
         base.Update(entities, world, beingHovered);
 
-        Age += TimeSpan.FromSeconds(DeltaTime());
+        Age += TimeSpan.FromSeconds(DeltaTime()) * _growthRate;
         _crowdCount = GetNearbyEntities(entities);
 
         //change stages
@@ -88,7 +90,7 @@ public class Food : Entity
             shouldDie = true;
 
         // reproduce
-        if (!beingEaten && shouldDie && _crowdCount < 3)
+        if (!beingEaten && shouldDie && _crowdCount < _overcrowdingAmount - 1)
             for (int i = 0; i < 2; i++)
             {
                 int range = _reproductionRadius;

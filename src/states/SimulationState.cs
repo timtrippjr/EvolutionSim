@@ -20,6 +20,8 @@ public class SimulationState : State
 
     private World _world;
 
+    private int MaxTimeMult = 16;
+
     public SimulationState(int worldWidth, int worldHeight)
     {
         _world = new(worldWidth, worldHeight);
@@ -31,7 +33,10 @@ public class SimulationState : State
         
         for (int i = 0; i < 18; i++)
             _entities.Add(new Animal(_world.GetRandomLandPosition()));
-        for (int i = 0; i < 80; i++)
+
+        int plantAmount = (255 - _world.WaterLevel) / 4;
+        Console.WriteLine("spawning plants: "+plantAmount);
+        for (int i = 0; i < plantAmount; i++)
             _entities.Add(new Food(
                 (FoodType)(i % 2), 
                 _world.GetRandomGrassPosition()
@@ -89,7 +94,7 @@ public class SimulationState : State
             _spawnFoodTime = _spawnFoodWaitTime;
             Console.WriteLine("Spawned more food");
             
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
                 _entities.Add(new Food(
                     (FoodType)Rng.Next(2), 
                     _world.GetRandomGrassPosition()
@@ -107,7 +112,7 @@ public class SimulationState : State
         if (IsKeyPressed(KeyboardKey.Right) || IsKeyPressedRepeat(KeyboardKey.Right))
         {
             TimeMultiple +=TimeMultiple < 1?0.25f:1;
-            if (TimeMultiple > 10) TimeMultiple = 10;
+            if (TimeMultiple > MaxTimeMult) TimeMultiple = MaxTimeMult;
         }
         if (IsKeyPressed(KeyboardKey.Left) || IsKeyPressedRepeat(KeyboardKey.Left))
         {

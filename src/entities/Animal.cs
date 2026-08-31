@@ -42,6 +42,7 @@ public class Animal : Entity
     private Vector2 _baseFrameSize = new(32, 32);
     private float _textureRotation = 0;
     private float _interactRadius = 7; // radius for eating, drinking, mating.
+    private float _baseEnergyLoss = 1.0f;
 
     // existence stuff
     public string Name { get; set; }
@@ -205,13 +206,21 @@ public class Animal : Entity
                     }
             }
 
-            Vector2 target = world.GetRandomGrassPosition();
-            if (_moveTarget != null) target = _moveTarget.Position;
+            //Vector2 target = world.GetRandomGrassPosition();
+            if (_moveTarget != null)
+            {
+                _moveDirection = (float)Math.Atan2(
+                    _moveTarget.Position.Y - Position.Y, 
+                    _moveTarget.Position.X - Position.X
+                );
+            }
+            else
+            {
+                _moveDirection = (float)(Rng.NextDouble() * Math.PI * 2);
+            }
+        
 
-            _moveDirection = (float)Math.Atan2(
-                target.Y - Position.Y, 
-                target.X - Position.X
-            );
+            
         }
 
         // if in search of energy, SLEEP!!
@@ -256,18 +265,17 @@ public class Animal : Entity
             );
         }
         
-        Hunger -= Speed * DeltaTime() * 0.075f;
-        Energy -= Speed * DeltaTime() * 0.15f;
+        Energy -= (_baseEnergyLoss / 100.0f) + Speed * 0.075f * DeltaTime();
         
         Vector2 movementStep = direction * Speed * DeltaTime();
         Vector2 nextPosition = Position + movementStep;
 
-        if (world.IsPositionUnderwater(nextPosition))
+        if (world.IsPositionUnderwater(nextPosition) || world.IsPositionOutOfBounds(nextPosition))
         {
             _moveDirection += (float)Math.PI;
             _state = AnimalState.Standing;
             _stateTimeLeft = TimeSpan.FromSeconds(Rng.Next(1, 20) / 10.0f);
-            _moveTarget = null; // Clear target if it was across a lake
+            _moveTarget = null; 
             return; 
         }
 
